@@ -99,7 +99,7 @@ if "postgresql" in ENGINE:
 # Static files (WhiteNoise)
 # -----------------------------------------------------
 STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]          # your dev assets
+# STATICFILES_DIRS = [BASE_DIR / "static"]          # your dev assets
 STATIC_ROOT = BASE_DIR / "staticfiles"            # collectstatic target
 STORAGES = {
     "staticfiles": {
