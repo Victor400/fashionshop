@@ -8,11 +8,25 @@
     <header>
       <nav>
         <a href="/">Home</a>
-        <a href="/admin/">Admin</a>
+        {% if user.is_authenticated %}
+          <span>Hi, {{ user.email|default:user.get_username }}</span>
+          <a href="{% url 'account_logout' %}">Logout</a>
+          <a href="/admin/">Admin</a>
+        {% else %}
+          <a href="{% url 'account_login' %}">Login</a>
+          <a href="{% url 'account_signup' %}">Sign Up</a>
+        {% endif %}
       </nav>
     </header>
     <main>
       {% block content %}{% endblock %}
     </main>
+    {% if messages %}
+      <ul>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
   </body>
 </html>
