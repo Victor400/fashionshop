@@ -1,5 +1,6 @@
-﻿Django>=5.1,<5.2
-psycopg2-binary==2.9.9
+﻿# requirements.txt
+Django==5.2.7
+psycopg[binary]~=3.2
 dj-database-url==2.2.0
 python-dotenv==1.0.1
 whitenoise==6.6.0

@@ -35,20 +35,34 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # local apps
+
+    # Sites (required by allauth)
+    "django.contrib.sites",
+
+    # Third-party
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",  
+
+    # Local apps
     "catalog",
+
 ]
+SITE_ID = 1
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",   # static in prod
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware", 
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
 
 # -----------------------------------------------------
 # URLs / WSGI / Templates
@@ -71,6 +85,14 @@ TEMPLATES = [
         },
     },
 ]
+
+# ---------- Auth / Allauth ----------
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",           # Django admin
+    "allauth.account.auth_backends.AuthenticationBackend", # allauth
+)
+
+
 
 # -----------------------------------------------------
 # Database (PostgreSQL via dj-database-url, with SQLite fallback)
