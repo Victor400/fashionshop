@@ -35,20 +35,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
-    # Sites (required by allauth)
     "django.contrib.sites",
-
-    # Third-party
     "allauth",
     "allauth.account",
     "allauth.socialaccount",  
-
-    # Local apps
     "catalog",
 
 ]
-SITE_ID = 1
 
 
 MIDDLEWARE = [
@@ -86,11 +79,25 @@ TEMPLATES = [
     },
 ]
 
+
 # ---------- Auth / Allauth ----------
 AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",           # Django admin
     "allauth.account.auth_backends.AuthenticationBackend", # allauth
 )
+
+SITE_ID = 1
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+DEFAULT_FROM_EMAIL = "no-reply@localhost"
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_SIGNUP_EMAIL_ENTER_TWICE = True
+ACCOUNT_USERNAME_MIN_LENGTH = 4
+LOGIN_URL = "account_login"
+LOGIN_REDIRECT_URL = "/"
 
 
 
