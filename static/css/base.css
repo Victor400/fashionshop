@@ -12,7 +12,7 @@ html {
 body {
     background: url('/media/homepage_image.jpg') no-repeat center center fixed;
     background-size: cover;
-    background-position: center calc(50% + 1px); /* adjust px as needed */
+    background-position: 35% 35%;
     min-height: 100%;
     color: #555;
     font-family: 'Lato', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
