@@ -2,23 +2,16 @@
 {% load static %}
 
 {% block title %}Home | FashionShop{% endblock %}
-
 {% block page_header %}{% endblock %}
 
 {% block content %}
-<div class="container">
-  <div class="row">
-    <div class="col-lg-5 col-md-7 col-sm-10 mt-5 pt-4">
-      <!-- Subtle glass card so the background face stays visible -->
-      <div class="p-4 p-md-5 rounded shadow-sm" style="background: rgba(255,255,255,.85);">
+<div class="container min-vh-50 d-flex align-items-end">
+  <div class="row w-100">
+    <div class="col-12 col-sm-10 col-md-6 col-lg-4 col-xl-3 offset-lg-1 mt-5 pt-4">
+      <div class="glass shadow p-4 p-md-4">
         <h1 class="h2 text-dark mb-2">Welcome to FashionShop</h1>
         <p class="text-muted mb-4">The new collections are here.</p>
-
         <a href="/" class="btn btn-dark btn-lg">Shop now</a>
-
-        {% if user.is_authenticated and user.is_superuser %}
-          <a href="/admin/" class="btn btn-outline-dark btn-lg ml-2">Admin</a>
-        {% endif %}
       </div>
     </div>
   </div>
