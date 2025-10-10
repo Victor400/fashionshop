@@ -1,0 +1,56 @@
+/* --- Base styles --- */
+
+/* Root sizing */
+html { height: 100%; }
+
+/* Page background + typography
+   - Use media image as full-bleed background
+   - Avoid forcing body height to calc(...) so content can scroll naturally under fixed header
+*/
+body {
+  background: url('/media/homepage_image.jpg') no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100%;
+  color: #555;
+  font-family: 'Lato', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* --- Utilities --- */
+
+/* from Bulma */
+.icon {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+.logo-font { text-transform: uppercase; }
+.main-logo-link { width: fit-content; }
+
+/* Buttons / color helpers (used by header/search) */
+.shop-now-button,
+.btn-black {
+  background: #000;
+  color: #fff;
+}
+
+.shop-now-button:hover,
+.shop-now-button:active,
+.shop-now-button:focus,
+.btn-black:hover,
+.btn-black:active,
+.btn-black:focus {
+  background: #222;
+  color: #fff;
+}
+
+.text-black { color: #000 !important; }
+.border-black { border: 1px solid #000 !important; }
+
+/* Slightly larger container on xl screens */
+@media (min-width: 1200px) {
+  .container { max-width: 80%; }
+}
+
