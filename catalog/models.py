@@ -1,10 +1,5 @@
 from django.db import models
 
-# Create your models here.
-
-
-from django.db import models
-
 
 class Category(models.Model):
     """Maps to fashionshop.category"""
@@ -20,3 +15,16 @@ class Category(models.Model):
     def __str__(self):
         return self.display_name or self.name
 
+
+class Brand(models.Model):
+    """Maps to fashionshop.brand"""
+    name = models.CharField(max_length=160, unique=True)
+    slug = models.SlugField(max_length=180, unique=True)
+
+    class Meta:
+        db_table = "brand"
+        managed = False
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
