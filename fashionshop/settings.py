@@ -131,8 +131,11 @@ if "postgresql" in ENGINE:
 # Static files (WhiteNoise)
 # -----------------------------------------------------
 STATIC_URL = "static/"
-# STATICFILES_DIRS = [BASE_DIR / "static"]          # your dev assets
-STATIC_ROOT = BASE_DIR / "staticfiles"            # collectstatic target
+STATICFILES_DIRS = [BASE_DIR / "static"]      
+STATIC_ROOT = BASE_DIR / "staticfiles"            
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"

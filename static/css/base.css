@@ -1,39 +1,48 @@
 /* --- Base styles --- */
 
 /* Root sizing */
-html { height: 100%; }
+html {
+    height: 100%;
+}
 
 /* Page background + typography
    - Use media image as full-bleed background
    - Avoid forcing body height to calc(...) so content can scroll naturally under fixed header
 */
 body {
-  background: url('/media/homepage_image.jpg') no-repeat center center fixed;
-  background-size: cover;
-  min-height: 100%;
-  color: #555;
-  font-family: 'Lato', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    background: url('/media/homepage_image.jpg') no-repeat center center fixed;
+    background-size: cover;
+    background-position: center calc(50% + 1px); /* adjust px as needed */
+    min-height: 100%;
+    color: #555;
+    font-family: 'Lato', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
+
 
 /* --- Utilities --- */
 
 /* from Bulma */
 .icon {
-  align-items: center;
-  display: inline-flex;
-  justify-content: center;
-  height: 1.5rem;
-  width: 1.5rem;
+    align-items: center;
+    display: inline-flex;
+    justify-content: center;
+    height: 1.5rem;
+    width: 1.5rem;
 }
 
-.logo-font { text-transform: uppercase; }
-.main-logo-link { width: fit-content; }
+.logo-font {
+    text-transform: uppercase;
+}
+
+.main-logo-link {
+    width: fit-content;
+}
 
 /* Buttons / color helpers (used by header/search) */
 .shop-now-button,
 .btn-black {
-  background: #000;
-  color: #fff;
+    background: #000;
+    color: #fff;
 }
 
 .shop-now-button:hover,
@@ -42,15 +51,50 @@ body {
 .btn-black:hover,
 .btn-black:active,
 .btn-black:focus {
-  background: #222;
-  color: #fff;
+    background: #222;
+    color: #fff;
 }
 
-.text-black { color: #000 !important; }
-.border-black { border: 1px solid #000 !important; }
+.text-black {
+    color: #000 !important;
+}
+
+.border-black {
+    border: 1px solid #000 !important;
+}
+
+
+/* -------------------------------- Media Queries */
+
+/* Nudge background for ~1920×1080 desktops */
+@media screen and (min-width: 1400px) and (min-aspect-ratio: 16/9) {
+  body { background-position: center 15%; }
+}
+
 
 /* Slightly larger container on xl screens */
 @media (min-width: 1200px) {
-  .container { max-width: 80%; }
+  .container {
+    max-width: 95%;
+  }
 }
+
+/* fixed top navbar only on medium and up */
+@media (min-width: 992px) {
+    .fixed-top-desktop-only {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 1030;
+    }
+
+    .header-container {
+        padding-top: 164px;
+    }
+}
+
+
+
+
 
