@@ -1,125 +1,159 @@
 /* --- Base styles --- */
 /* Theme tokens */
 :root {
-    --bg: #FAFAFA;
-    /* try #FFFFFF for pure white or #F2F2F2 for light gray */
-    --surface: #FFFFFF;
-    /* cards/sections */
-    --text: #111;
-    --muted: #6b7280;
+  --bg: #FAFAFA;       /* try #FFFFFF for pure white or #F2F2F2 for light gray */
+  --surface: #FFFFFF;  /* cards/sections */
+  --text: #111;
+  --muted: #6b7280;
 }
 
 /* Global */
-html,
-body {
-    height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Lato', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Lato', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* Space for fixed header */
-main {
-    padding-top: 6rem;
-}
+/* Space for fixed header (desktop default) */
+main { padding-top: 6rem; }
 
 /* --- Sections with images --- */
-.section {
-    margin: 2.5rem 0;
-}
+.section { margin: 2.5rem 0; }
 
 .section .panel {
-    background: var(--surface);
-    border-radius: .75rem;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, .06);
-    overflow: hidden;
-    /* clip image corners */
+  background: var(--surface);
+  border-radius: .75rem;
+  box-shadow: 0 10px 24px rgba(0,0,0,.06);
+  overflow: hidden; /* clip image corners */
 }
 
 .section .panel img {
-    display: block;
-    width: 100%;
-    height: auto;
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-.section p {
-    color: var(--muted);
-    max-width: 52ch;
-}
+.section p { color: var(--muted); max-width: 52ch; }
 
 /* Solid “glass” callout (white card) */
 .glass {
-    background: var(--surface);
-    border: 1px solid rgba(0, 0, 0, .06);
-    box-shadow: 0 8px 32px rgba(31, 38, 135, .08);
-    border-radius: .75rem;
+  background: var(--surface);
+  border: 1px solid rgba(0,0,0,.06);
+  box-shadow: 0 8px 32px rgba(31,38,135,.08);
+  border-radius: .75rem;
 }
 
 /* Utilities */
-.icon {
-    align-items: center;
-    display: inline-flex;
-    justify-content: center;
-    height: 1.5rem;
-    width: 1.5rem;
-}
+.icon { align-items:center; display:inline-flex; justify-content:center; height:1.5rem; width:1.5rem; }
+.logo-font { text-transform: uppercase; }
+.main-logo-link { width: fit-content; }
+.rounded-lg { border-radius: .75rem; } /* for Bootstrap 4 projects missing it */
 
-.logo-font {
-    text-transform: uppercase;
-}
+.shop-now-button, .btn-black { background:#000; color:#fff; }
+.shop-now-button:hover, .shop-now-button:active, .shop-now-button:focus,
+.btn-black:hover, .btn-black:active, .btn-black:focus { background:#222; color:#fff; }
 
-.main-logo-link {
-    width: fit-content;
-}
-
-.rounded-lg {
-    border-radius: .75rem;
-}
-
-/* for Bootstrap 4 projects missing it */
-
-.shop-now-button,
-.btn-black {
-    background: #000;
-    color: #fff;
-}
-
-.shop-now-button:hover,
-.shop-now-button:active,
-.shop-now-button:focus,
-.btn-black:hover,
-.btn-black:active,
-.btn-black:focus {
-    background: #222;
-    color: #fff;
-}
-
-.text-black {
-    color: #000 !important;
-}
-
-.border-black {
-    border: 1px solid #000 !important;
-}
+.text-black { color:#000 !important; }
+.border-black { border:1px solid #000 !important; }
 
 /* Layout tweaks */
 @media (min-width: 1200px) {
-    .container {
-        max-width: 95%;
-    }
+  .container { max-width: 95%; }
 }
 
-/* Fixed-top helper (if you’re using it) */
-@media (min-width: 992px) {
-    .fixed-top-desktop-only {
-        position: fixed;
-        top: 0;
-        right: 0;
-        left: 0;
-        z-index: 1030;
-    }
+/* =========================
+   RESPONSIVE MEDIA QUERIES
+   ========================= */
 
-    .header-container {
-        padding-top: 164px;
-    }
+/* Mobile first tweaks: <576px */
+@media (max-width: 575.98px) {
+  /* Make header non-fixed on phones so it doesn't cover content */
+  header.fixed-top,
+  .fixed-top-desktop-only { position: static !important; }
+
+  /* Less top padding since header isn't fixed now */
+  main { padding-top: 1.25rem; }
+
+  /* Tighter header spacing */
+  #topnav .col-12 { padding-top: .25rem; padding-bottom: .25rem; }
+  .main-logo-link h2 { font-size: 1.25rem; line-height: 1.2; margin: 0; }
+  .navbar { padding: .25rem 0; }
+  .navbar .navbar-toggler { padding: .25rem .5rem; font-size: 1rem; }
+
+  /* Compact search */
+  header form input[type="text"] { height: 2.25rem; font-size: .95rem; }
+  header form .btn { height: 2.25rem; padding: .25rem .5rem; }
+
+  /* Section rhythm */
+  .section { margin: 1.25rem 0; }
+
+  /* Panel (image card) */
+  .section .panel { border-radius: .5rem; box-shadow: 0 6px 16px rgba(0,0,0,.06); }
+
+  /* Constrain very tall images; crop gracefully */
+  .section .panel img { width: 100%; height: 220px; object-fit: cover; }
+
+  /* Glass card spacing + readable sizes */
+  .glass { padding: 1rem !important; }
+  h1.h3, .h3 { font-size: 1.25rem; }
+  h2.h4, .h4 { font-size: 1.125rem; }
+  .section p { font-size: .95rem; }
+
+  /* Buttons full-width on small screens */
+  .btn.btn-lg { width: 100%; }
+}
+
+/* Small devices / large phones & tiny tablets: 576–767px */
+@media (min-width: 576px) and (max-width: 767.98px) {
+  /* Keep header non-fixed here too (more content space) */
+  header.fixed-top,
+  .fixed-top-desktop-only { position: static !important; }
+
+  main { padding-top: 1.75rem; }
+
+  .main-logo-link h2 { font-size: 1.35rem; margin: 0; }
+  .navbar { padding: .35rem 0; }
+
+  .section { margin: 1.75rem 0; }
+  .section .panel img { height: 280px; object-fit: cover; }
+  .glass { padding: 1.25rem !important; }
+  h1.h3, .h3 { font-size: 1.35rem; }
+  h2.h4, .h4 { font-size: 1.15rem; }
+}
+
+/* Tablets: 768–991px */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  /* You can choose: fixed or static. Keep some top padding either way. */
+  main { padding-top: 4rem; }
+
+  .navbar { padding: .5rem 0; }
+  .main-logo-link h2 { font-size: 1.5rem; }
+
+  .section { margin: 2rem 0; }
+  .section .panel img { height: 360px; object-fit: cover; }
+  .glass { padding: 1.5rem !important; }
+  h1.h3, .h3 { font-size: 1.5rem; }
+  h2.h4, .h4 { font-size: 1.25rem; }
+}
+
+/* Desktop+: ≥992px (optional refinements) */
+@media (min-width: 992px) {
+  /* Fixed-top helper active only on desktop */
+  .fixed-top-desktop-only {
+    position: fixed; top: 0; right: 0; left: 0; z-index: 1030;
+  }
+  .header-container { padding-top: 164px; }
+
+  .section .panel img { height: auto; } /* natural height on large screens */
+}
+
+/* Orientation helpers (optional) */
+@media (max-width: 767.98px) and (orientation: landscape) {
+  .section .panel img { height: 180px; } /* shorter in landscape phones */
+}
+
+/* Motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
 }
