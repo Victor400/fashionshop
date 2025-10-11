@@ -1,19 +1,42 @@
 {% extends "base.html" %}
-{% load static %}
 
 {% block title %}Home | FashionShop{% endblock %}
 {% block page_header %}{% endblock %}
 
 {% block content %}
-<div class="container min-vh-50 d-flex align-items-end">
-  <div class="row w-100">
-    <div class="col-12 col-sm-10 col-md-6 col-lg-4 col-xl-3 offset-lg-1 mt-5 pt-4">
-      <div class="glass shadow p-4 p-md-4">
-        <h1 class="h2 text-dark mb-2">Welcome to FashionShop</h1>
+<!-- Section 1 -->
+<section class="container section">
+  <div class="row align-items-center">
+    <div class="col-md-7 mb-3 mb-md-0">
+      <div class="panel">
+        <img src="{{ MEDIA_URL }}spotlight.jpg" alt="New collections">
+      </div>
+    </div>
+    <div class="col-md-5">
+      <div class="glass p-4">
+        <h1 class="h3 mb-2">Welcome to FashionShop</h1>
         <p class="text-muted mb-4">The new collections are here.</p>
-        <a href="/" class="btn btn-dark btn-lg">Shop now</a>
+        <a href="" class="btn btn-dark btn-lg">Shop now</a>
       </div>
     </div>
   </div>
-</div>
+</section>
+
+<section class="container section">
+  <div class="row align-items-center flex-md-row-reverse">
+    <div class="col-md-7 mb-3 mb-md-0">
+      <div class="panel">
+        <img src="{{ MEDIA_URL }}hero.jpg" alt="Season spotlight">
+      </div>
+    </div>
+    <div class="col-md-5">
+      <div class="glass p-4">
+        <h2 class="h4 mb-2">Season Spotlight</h2>
+        <p class="text-muted mb-4">Curated looks across menswear, womenswear, shoes, and bags.</p>
+        <a href="" class="btn btn-outline-dark">Discover now</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 {% endblock %}
