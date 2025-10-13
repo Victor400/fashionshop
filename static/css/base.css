@@ -1,159 +1,404 @@
-/* --- Base styles --- */
-/* Theme tokens */
+/* =========================
+   THEME TOKENS
+   =========================
+    */
 :root {
-  --bg: #FAFAFA;       /* try #FFFFFF for pure white or #F2F2F2 for light gray */
-  --surface: #FFFFFF;  /* cards/sections */
-  --text: #111;
-  --muted: #6b7280;
-}
-
-/* Global */
-html, body {
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Lato', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-}
-
-/* Space for fixed header (desktop default) */
-main { padding-top: 6rem; }
-
-/* --- Sections with images --- */
-.section { margin: 2.5rem 0; }
-
-.section .panel {
-  background: var(--surface);
-  border-radius: .75rem;
-  box-shadow: 0 10px 24px rgba(0,0,0,.06);
-  overflow: hidden; /* clip image corners */
-}
-
-.section .panel img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.section p { color: var(--muted); max-width: 52ch; }
-
-/* Solid “glass” callout (white card) */
-.glass {
-  background: var(--surface);
-  border: 1px solid rgba(0,0,0,.06);
-  box-shadow: 0 8px 32px rgba(31,38,135,.08);
-  border-radius: .75rem;
-}
-
-/* Utilities */
-.icon { align-items:center; display:inline-flex; justify-content:center; height:1.5rem; width:1.5rem; }
-.logo-font { text-transform: uppercase; }
-.main-logo-link { width: fit-content; }
-.rounded-lg { border-radius: .75rem; } /* for Bootstrap 4 projects missing it */
-
-.shop-now-button, .btn-black { background:#000; color:#fff; }
-.shop-now-button:hover, .shop-now-button:active, .shop-now-button:focus,
-.btn-black:hover, .btn-black:active, .btn-black:focus { background:#222; color:#fff; }
-
-.text-black { color:#000 !important; }
-.border-black { border:1px solid #000 !important; }
-
-/* Layout tweaks */
-@media (min-width: 1200px) {
-  .container { max-width: 95%; }
+    --bg: #FAFAFA;
+    --surface: #FFFFFF;
+    --text: #111;
+    --muted: #6b7280;
+    --shadow: 0 10px 24px rgba(0, 0, 0, .06);
+    --shadow-hover: 0 14px 32px rgba(0, 0, 0, .10);
+    --hairline: 1px solid rgba(0, 0, 0, .06);
+    --radius: .75rem;
 }
 
 /* =========================
-   RESPONSIVE MEDIA QUERIES
+   GLOBAL
    ========================= */
-
-/* Mobile first tweaks: <576px */
-@media (max-width: 575.98px) {
-  /* Make header non-fixed on phones so it doesn't cover content */
-  header.fixed-top,
-  .fixed-top-desktop-only { position: static !important; }
-
-  /* Less top padding since header isn't fixed now */
-  main { padding-top: 1.25rem; }
-
-  /* Tighter header spacing */
-  #topnav .col-12 { padding-top: .25rem; padding-bottom: .25rem; }
-  .main-logo-link h2 { font-size: 1.25rem; line-height: 1.2; margin: 0; }
-  .navbar { padding: .25rem 0; }
-  .navbar .navbar-toggler { padding: .25rem .5rem; font-size: 1rem; }
-
-  /* Compact search */
-  header form input[type="text"] { height: 2.25rem; font-size: .95rem; }
-  header form .btn { height: 2.25rem; padding: .25rem .5rem; }
-
-  /* Section rhythm */
-  .section { margin: 1.25rem 0; }
-
-  /* Panel (image card) */
-  .section .panel { border-radius: .5rem; box-shadow: 0 6px 16px rgba(0,0,0,.06); }
-
-  /* Constrain very tall images; crop gracefully */
-  .section .panel img { width: 100%; height: 220px; object-fit: cover; }
-
-  /* Glass card spacing + readable sizes */
-  .glass { padding: 1rem !important; }
-  h1.h3, .h3 { font-size: 1.25rem; }
-  h2.h4, .h4 { font-size: 1.125rem; }
-  .section p { font-size: .95rem; }
-
-  /* Buttons full-width on small screens */
-  .btn.btn-lg { width: 100%; }
+html,
+body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lato', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* Small devices / large phones & tiny tablets: 576–767px */
-@media (min-width: 576px) and (max-width: 767.98px) {
-  /* Keep header non-fixed here too (more content space) */
-  header.fixed-top,
-  .fixed-top-desktop-only { position: static !important; }
-
-  main { padding-top: 1.75rem; }
-
-  .main-logo-link h2 { font-size: 1.35rem; margin: 0; }
-  .navbar { padding: .35rem 0; }
-
-  .section { margin: 1.75rem 0; }
-  .section .panel img { height: 280px; object-fit: cover; }
-  .glass { padding: 1.25rem !important; }
-  h1.h3, .h3 { font-size: 1.35rem; }
-  h2.h4, .h4 { font-size: 1.15rem; }
+/* space for desktop header */
+main {
+    padding-top: 6rem;
 }
 
-/* Tablets: 768–991px */
-@media (min-width: 768px) and (max-width: 991.98px) {
-  /* You can choose: fixed or static. Keep some top padding either way. */
-  main { padding-top: 4rem; }
-
-  .navbar { padding: .5rem 0; }
-  .main-logo-link h2 { font-size: 1.5rem; }
-
-  .section { margin: 2rem 0; }
-  .section .panel img { height: 360px; object-fit: cover; }
-  .glass { padding: 1.5rem !important; }
-  h1.h3, .h3 { font-size: 1.5rem; }
-  h2.h4, .h4 { font-size: 1.25rem; }
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.5rem;
+    width: 1.5rem;
 }
 
-/* Desktop+: ≥992px (optional refinements) */
-@media (min-width: 992px) {
-  /* Fixed-top helper active only on desktop */
-  .fixed-top-desktop-only {
-    position: fixed; top: 0; right: 0; left: 0; z-index: 1030;
-  }
-  .header-container { padding-top: 164px; }
-
-  .section .panel img { height: auto; } /* natural height on large screens */
+.logo-font {
+    text-transform: uppercase;
 }
 
-/* Orientation helpers (optional) */
-@media (max-width: 767.98px) and (orientation: landscape) {
-  .section .panel img { height: 180px; } /* shorter in landscape phones */
+.main-logo-link {
+    width: fit-content;
+}
+
+.rounded-lg {
+    border-radius: var(--radius);
+}
+
+.text-black {
+    color: #000 !important;
+}
+
+.border-black {
+    border: 1px solid #000 !important;
+}
+
+/* Buttons */
+.shop-now-button,
+.btn-black {
+    background: #000;
+    color: #fff;
+}
+
+.shop-now-button:hover,
+.shop-now-button:active,
+.shop-now-button:focus,
+.btn-black:hover,
+.btn-black:active,
+.btn-black:focus {
+    background: #222;
+    color: #fff;
+}
+
+/* wider container on very large screens */
+@media (min-width:1200px) {
+    .container {
+        max-width: 95%;
+    }
+}
+
+/* =========================
+   SECTIONS (home hero panels etc.)
+   ========================= */
+.section {
+    margin: 2.5rem 0;
+}
+
+.section .panel {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.section .panel img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.section p {
+    color: var(--muted);
+    max-width: 52ch;
+}
+
+.glass {
+    background: var(--surface);
+    border: var(--hairline);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, .08);
+    border-radius: var(--radius);
+}
+
+/* =========================
+   CATALOG GRID (product cards)
+   ========================= */
+.card.product-card {
+    height: 100%;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: var(--hairline);
+    box-shadow: var(--shadow);
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.card.product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* Image box */
+.product-card-media {
+    position: relative;
+    height: 230px;
+    /* default image area height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    padding: 10px;
+    overflow: hidden;
+    border-bottom: var(--hairline);
+}
+
+.product-card-media img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    /* no crop/stretch */
+    transition: transform .25s ease;
+}
+
+.product-card:hover .product-card-media img {
+    transform: scale(1.04);
+}
+
+/* Card body */
+.product-card .card-body {
+    padding: .75rem .85rem .9rem;
+}
+
+.product-title {
+    font-weight: 700;
+}
+
+.brand-line {
+    color: var(--muted);
+}
+
+.desc-line {
+    color: var(--muted);
+    line-height: 1.35;
+    min-height: 2.7em;
+}
+
+/* keeps rows even */
+.price {
+    font-weight: 700;
+    text-align: center;
+}
+
+/* bump media height on larger screens */
+@media (min-width:768px) {
+    .product-card-media {
+        height: 250px;
+    }
+}
+
+@media (min-width:1200px) {
+    .product-card-media {
+        height: 270px;
+    }
+}
+
+/* =========================
+   RESPONSIVE: HEADER + LAYOUT
+   ========================= */
+/* Phones <576px */
+@media (max-width:575.98px) {
+
+    /* make header non-fixed so it doesn’t cover content */
+    header.fixed-top,
+    .fixed-top-desktop-only {
+        position: static !important;
+    }
+
+    main {
+        padding-top: 1.25rem;
+    }
+
+    /* compact header */
+    #topnav .col-12 {
+        padding-top: .25rem;
+        padding-bottom: .25rem;
+    }
+
+    .main-logo-link h2 {
+        font-size: 1.25rem;
+        line-height: 1.2;
+        margin: 0;
+    }
+
+    .navbar {
+        padding: .25rem 0;
+    }
+
+    .navbar .navbar-toggler {
+        padding: .25rem .5rem;
+        font-size: 1rem;
+    }
+
+    /* compact header search */
+    header form input[type="text"] {
+        height: 2.25rem;
+        font-size: .95rem;
+    }
+
+    header form .btn {
+        height: 2.25rem;
+        padding: .25rem .5rem;
+    }
+
+    /* section rhythm + image control */
+    .section {
+        margin: 1.25rem 0;
+    }
+
+    .section .panel {
+        border-radius: .5rem;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, .06);
+    }
+
+    .section .panel img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+    }
+
+    .glass {
+        padding: 1rem !important;
+    }
+
+    h1.h3,
+    .h3 {
+        font-size: 1.25rem;
+    }
+
+    h2.h4,
+    .h4 {
+        font-size: 1.125rem;
+    }
+
+    .section p {
+        font-size: .95rem;
+    }
+
+    /* CTA buttons full width */
+    .btn.btn-lg {
+        width: 100%;
+    }
+}
+
+/* 576–767px */
+@media (min-width:576px) and (max-width:767.98px) {
+
+    header.fixed-top,
+    .fixed-top-desktop-only {
+        position: static !important;
+    }
+
+    main {
+        padding-top: 1.75rem;
+    }
+
+    .main-logo-link h2 {
+        font-size: 1.35rem;
+        margin: 0;
+    }
+
+    .navbar {
+        padding: .35rem 0;
+    }
+
+    .section {
+        margin: 1.75rem 0;
+    }
+
+    .section .panel img {
+        height: 280px;
+        object-fit: cover;
+    }
+
+    .glass {
+        padding: 1.25rem !important;
+    }
+
+    h1.h3,
+    .h3 {
+        font-size: 1.35rem;
+    }
+
+    h2.h4,
+    .h4 {
+        font-size: 1.15rem;
+    }
+}
+
+/* Tablets 768–991px */
+@media (min-width:768px) and (max-width:991.98px) {
+    main {
+        padding-top: 4rem;
+    }
+
+    .navbar {
+        padding: .5rem 0;
+    }
+
+    .main-logo-link h2 {
+        font-size: 1.5rem;
+    }
+
+    .section {
+        margin: 2rem 0;
+    }
+
+    .section .panel img {
+        height: 360px;
+        object-fit: cover;
+    }
+
+    .glass {
+        padding: 1.5rem !important;
+    }
+
+    h1.h3,
+    .h3 {
+        font-size: 1.5rem;
+    }
+
+    h2.h4,
+    .h4 {
+        font-size: 1.25rem;
+    }
+}
+
+/* Desktop ≥992px */
+@media (min-width:992px) {
+    .fixed-top-desktop-only {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 1030;
+    }
+
+    .header-container {
+        padding-top: 164px;
+    }
+
+    .section .panel img {
+        height: auto;
+    }
+
+    /* natural height on big screens */
+}
+
+/* Landscape phones helper */
+@media (max-width:767.98px) and (orientation:landscape) {
+    .section .panel img {
+        height: 180px;
+    }
 }
 
 /* Motion accessibility */
-@media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; animation: none !important; }
+@media (prefers-reduced-motion:reduce) {
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
 }
