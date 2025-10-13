@@ -133,7 +133,7 @@ main {
 /* Image box */
 .product-card-media {
     position: relative;
-    height: 230px;
+    height: 134px;
     /* default image area height */
     display: flex;
     align-items: center;
@@ -186,7 +186,7 @@ main {
 /* bump media height on larger screens */
 @media (min-width:768px) {
     .product-card-media {
-        height: 250px;
+        height: 130px;
     }
 }
 
