@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}New Product | FashionShop{% endblock %}
+
+{% block content %}
+<div class="container mt-4 pt-2 mt-lg-5 pt-lg-4">
+  <h1 class="h4 mb-3">Create product</h1>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for err in field.errors %}
+          <div class="invalid-feedback d-block">{{ err }}</div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-dark">Save</button>
+    <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

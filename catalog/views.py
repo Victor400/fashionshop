@@ -1,7 +1,15 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.db.models import Q
 from .models import Product, Category
+
+
+from django.contrib import messages                         # +new
+from django.contrib.auth.decorators import user_passes_test # +new
+from django.urls import reverse                              # +new
+
+from .models import Product, Category
+                    
 
 
 def product_list(request):
@@ -41,3 +49,29 @@ def product_detail(request, slug):
         slug=slug,
     )
     return render(request, "catalog/product_detail.html", {"p": p})
+
+# catalog/views.py
+from django.core.exceptions import PermissionDenied
+from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
+from django.core.exceptions import PermissionDenied
+
+from .forms import ProductForm
+from .models import Product
+
+def product_create(request):
+    # 403 for non-staff (meets your AC)
+    if not (request.user.is_authenticated and request.user.is_staff):
+        raise PermissionDenied("You must be staff to manage products.")
+
+    if request.method == "POST":
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            product = form.save()
+            messages.success(request, f"Product “{product.name}” created.")
+            return redirect("catalog:product_detail", slug=product.slug)
+        messages.error(request, "Please correct the errors below.")
+    else:
+        form = ProductForm()
+
+    return render(request, "catalog/product_form.html", {"form": form})
