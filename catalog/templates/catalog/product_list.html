@@ -4,13 +4,14 @@
 {% block title %}Products | FashionShop{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container catalog-page">
   {% if page_obj.object_list %}
-    <div class="row">
+    <div class="row mt-3 mt-md-4">
       {% for p in page_obj %}
-       <div class="col-6 col-md-4 col-lg-4 col-xl-4 mb-4">
-          <a href="" class="text-reset text-decoration-none d-block h-100">
-           <div class="card product-card product-card--compact h-100">
+        <div class="col-6 col-md-4 col-lg-4 col-xl-4 mb-4">
+          <a href="{% url 'catalog:product_detail' p.slug %}"
+             class="text-reset text-decoration-none d-block h-100">
+            <div class="card product-card product-card--compact h-100">
 
               <div class="product-card-media">
                 <img
@@ -26,22 +27,21 @@
                 </div>
 
                 {% if p.description %}
-                  <p class="desc-line mb-2">
-                    {{ p.description|striptags|truncatewords:18 }}
-                  </p>
+                  <p class="desc-line mb-2">{{ p.description|striptags|truncatewords:18 }}</p>
                 {% else %}
                   <p class="desc-line mb-2">&nbsp;</p>
                 {% endif %}
 
                 <div class="mt-auto price">£{{ p.price }}</div>
               </div>
+
             </div>
           </a>
         </div>
       {% endfor %}
     </div>
 
-    {% if is_paginated %}
+    {% if page_obj.paginator.num_pages > 1 %}
       <nav aria-label="Products pagination">
         <ul class="pagination">
           {% if page_obj.has_previous %}
@@ -71,4 +71,3 @@
   {% endif %}
 </div>
 {% endblock %}
-

@@ -1,7 +1,3 @@
-/* =========================
-   THEME TOKENS
-   =========================
-    */
 :root {
     --bg: #FAFAFA;
     --surface: #FFFFFF;
@@ -24,9 +20,9 @@ body {
     font-family: 'Lato', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* space for desktop header */
+/* space for fixed header (desktop default) */
 main {
-    padding-top: 6rem;
+    padding-top: 8rem;
 }
 
 .icon {
@@ -74,12 +70,6 @@ main {
     color: #fff;
 }
 
-/* wider container on very large screens */
-@media (min-width:1200px) {
-    .container {
-        max-width: 95%;
-    }
-}
 
 /* =========================
    SECTIONS (home hero panels etc.)
@@ -106,6 +96,7 @@ main {
     max-width: 52ch;
 }
 
+/* Glass panel */
 .glass {
     background: var(--surface);
     border: var(--hairline);
@@ -130,18 +121,17 @@ main {
     box-shadow: var(--shadow-hover);
 }
 
-/* Image box */
+/* Image stage (LIST GRID) — bigger, centered, no cropping */
 .product-card-media {
-    position: relative;
-    height: 134px;
-    /* default image area height */
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 180px;
+    /* phones */
     background: #fff;
-    padding: 10px;
     overflow: hidden;
-    border-bottom: var(--hairline);
+    border-top-left-radius: .25rem;
+    border-top-right-radius: .25rem;
 }
 
 .product-card-media img {
@@ -150,12 +140,36 @@ main {
     width: auto;
     height: auto;
     object-fit: contain;
-    /* no crop/stretch */
+    /* preserves 60×80, no crop/stretch */
+    display: block;
     transition: transform .25s ease;
 }
 
 .product-card:hover .product-card-media img {
     transform: scale(1.04);
+}
+
+
+/* bump media height on larger screens */
+@media (min-width:768px) {
+
+    /* md */
+    .product-card-media {
+        height: 200px;
+    }
+}
+
+@media (min-width:1200px) {
+
+    /* xl */
+    .product-card-media {
+        height: 240px;
+    }
+
+    .container {
+        max-width: 95%;
+    }
+
 }
 
 /* Card body */
@@ -167,32 +181,49 @@ main {
     font-weight: 700;
 }
 
-.brand-line {
+.brand-line,
+.desc-line {
     color: var(--muted);
 }
 
 .desc-line {
-    color: var(--muted);
     line-height: 1.35;
     min-height: 2.7em;
 }
 
-/* keeps rows even */
 .price {
     font-weight: 700;
     text-align: center;
 }
 
-/* bump media height on larger screens */
-@media (min-width:768px) {
-    .product-card-media {
-        height: 130px;
-    }
+/* =========================
+   PRODUCT DETAIL MEDIA
+   ========================= */
+.product-detail-media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 320px;
+    /* phones/tablets */
+    background: #fff;
+    overflow: hidden;
+    border-radius: .25rem;
 }
 
-@media (min-width:1200px) {
-    .product-card-media {
-        height: 270px;
+.product-detail-media img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+}
+
+@media (min-width:992px) {
+
+    /* lg desktop stage */
+    .product-detail-media {
+        min-height: 420px;
     }
 }
 
@@ -377,6 +408,10 @@ main {
         z-index: 1030;
     }
 
+    main {
+        padding-top: 8.25rem;
+    }
+
     .header-container {
         padding-top: 164px;
     }
@@ -385,7 +420,9 @@ main {
         height: auto;
     }
 
-    /* natural height on big screens */
+    .catalog-page {
+        margin-top: 3.5rem;
+    }
 }
 
 /* Landscape phones helper */
@@ -400,5 +437,24 @@ main {
     * {
         transition: none !important;
         animation: none !important;
+    }
+}
+
+
+
+/* Push product list below fixed header */
+.catalog-page {
+    margin-top: 2rem;
+}
+
+/* phones/tablets */
+
+
+
+@media (min-width: 1400px) {
+
+    /* big desktops */
+    .catalog-page {
+        margin-top: 4.5rem;
     }
 }

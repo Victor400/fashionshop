@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ p.name }} | FashionShop{% endblock %}
+
+{% block content %}
+<div class="container mt-4 pt-2 mt-lg-5 pt-lg-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb bg-transparent p-0 mb-0">
+      <li class="breadcrumb-item">
+        <a href="{% url 'catalog:product_list' %}">Products</a>
+      </li>
+      {% if p.category %}
+      <li class="breadcrumb-item">
+        <a href="{% url 'catalog:product_list' %}?cat={{ p.category.slug }}">
+          {{ p.category.display_name|default:p.category.name }}
+        </a>
+      </li>
+      {% endif %}
+      <li class="breadcrumb-item active" aria-current="page">{{ p.name }}</li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <!-- Image -->
+    <div class="col-md-6 mb-4">
+      <div class="border rounded p-2 bg-white">
+        <img
+          class="img-fluid d-block mx-auto"
+          alt="{{ p.name }}"
+          src="{% static 'catalog/img/products/' %}{{ p.sku|lower }}.jpg">
+      </div>
+    </div>
+
+    <!-- Details -->
+    <div class="col-md-6">
+      <h1 class="h3 mb-2">{{ p.name }}</h1>
+
+      <div class="mb-2">
+        <span class="h4 mb-0">£{{ p.price|floatformat:2 }}</span>
+      </div>
+
+      <ul class="list-unstyled text-muted mb-3">
+        {% if p.brand %}<li><strong class="text-dark">Brand:</strong> {{ p.brand.name }}</li>{% endif %}
+        {% if p.category %}<li><strong class="text-dark">Category:</strong> {{ p.category.display_name|default:p.category.name }}</li>{% endif %}
+        <li><strong class="text-dark">SKU:</strong> {{ p.sku }}</li>
+        <li>
+          <strong class="text-dark">Stock:</strong>
+          {% if p.stock > 0 %}In stock ({{ p.stock }}){% else %}<span class="text-danger">Out of stock</span>{% endif %}
+        </li>
+      </ul>
+
+      {% if p.description %}
+        <p class="mb-4">{{ p.description|linebreaksbr }}</p>
+      {% endif %}
+
+      {% if p.stock > 0 %}
+        <a href="#" class="btn btn-dark btn-lg">Add to bag</a>
+      {% else %}
+        <button class="btn btn-secondary btn-lg" disabled>Out of stock</button>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

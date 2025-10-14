@@ -1,46 +1,29 @@
-from django.shortcuts import render
-from django.db.models import F
-from .models import Product
+from django.shortcuts import render, get_object_or_404
+from django.core.paginator import Paginator
+from django.db.models import Q
+from .models import Product, Category
+
 
 def product_list(request):
-    qs = (
-        Product.objects.all()
-        .select_related("brand", "category")
-    )
+    qs = Product.objects.select_related("brand", "category").all()
 
-    # optional filters you already use
     q = request.GET.get("q")
     if q:
-        qs = qs.filter(name__icontains=q)
+        qs = qs.filter(Q(name__icontains=q) | Q(sku__icontains=q) | Q(brand__name__icontains=q))
 
     cat = request.GET.get("cat")
     if cat:
         qs = qs.filter(category__slug=cat)
 
-    # --- SORTING ---
-    sort = request.GET.get("sort")         # e.g. "price" or "name"
-    direction = request.GET.get("direction")  # "asc" or "desc"
-
-    # whitelist allowed fields (avoid arbitrary order_by injection)
-    allowed_fields = {
-        "price": "price",
-        "name": "name",
-        # add more allowed sort fields as needed
-    }
-
+    sort = request.GET.get("sort")
+    direction = request.GET.get("direction")
+    allowed_fields = {"price": "price", "name": "name"}
     sort_field = allowed_fields.get(sort)
     if sort_field:
-        if direction == "desc":
-            sort_key = f"-{sort_field}"
-        else:
-            sort_key = sort_field
-        qs = qs.order_by(sort_key)
+        qs = qs.order_by(f"-{sort_field}" if direction == "desc" else sort_field)
 
-    # paginate as you already do
-    from django.core.paginator import Paginator
-    paginator = Paginator(qs, 12)  # 12 per page or your number
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
+    paginator = Paginator(qs, 12)
+    page_obj = paginator.get_page(request.GET.get("page"))
 
     context = {
         "page_obj": page_obj,
@@ -50,3 +33,11 @@ def product_list(request):
         "direction": direction or "",
     }
     return render(request, "catalog/product_list.html", context)
+
+
+def product_detail(request, slug):
+    p = get_object_or_404(
+        Product.objects.select_related("brand", "category"),
+        slug=slug,
+    )
+    return render(request, "catalog/product_detail.html", {"p": p})
