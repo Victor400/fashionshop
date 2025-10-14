@@ -1,10 +1,12 @@
 {% extends "base.html" %}
-
-{% block title %}New Product | FashionShop{% endblock %}
+{% block title %}{{ is_edit|yesno:"Edit Product,New Product" }} | FashionShop{% endblock %}
 
 {% block content %}
 <div class="container mt-4 pt-2 mt-lg-5 pt-lg-4">
-  <h1 class="h4 mb-3">Create product</h1>
+  <h1 class="h4 mb-3">
+    {% if is_edit %}Edit product{% else %}Create product{% endif %}
+    {% if is_edit %}<small class="text-muted">({{ p.sku }})</small>{% endif %}
+  </h1>
 
   <form method="post" novalidate>
     {% csrf_token %}
@@ -23,8 +25,15 @@
       <div class="alert alert-danger">{{ form.non_field_errors }}</div>
     {% endif %}
 
-    <button type="submit" class="btn btn-dark">Save</button>
-    <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-secondary">Cancel</a>
+    <button type="submit" class="btn btn-dark mr-2">
+      {% if is_edit %}Save changes{% else %}Save{% endif %}
+    </button>
+
+    {% if is_edit and p %}
+      <a href="{% url 'catalog:product_detail' p.slug %}" class="btn btn-outline-secondary">Cancel</a>
+    {% else %}
+      <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-secondary">Cancel</a>
+    {% endif %}
   </form>
 </div>
 {% endblock %}

@@ -1,23 +1,25 @@
-from django.shortcuts import render, get_object_or_404, redirect
+# catalog/views.py
+from django.core.exceptions import PermissionDenied
+from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
-from .models import Product, Category
+from django.shortcuts import render, redirect, get_object_or_404
+
+from .forms import ProductForm
+from .models import Product
 
 
-from django.contrib import messages                         # +new
-from django.contrib.auth.decorators import user_passes_test # +new
-from django.urls import reverse                              # +new
-
-from .models import Product, Category
-                    
-
-
+# ---------- Public: list & detail ----------
 def product_list(request):
     qs = Product.objects.select_related("brand", "category").all()
 
     q = request.GET.get("q")
     if q:
-        qs = qs.filter(Q(name__icontains=q) | Q(sku__icontains=q) | Q(brand__name__icontains=q))
+        qs = qs.filter(
+            Q(name__icontains=q) |
+            Q(sku__icontains=q) |
+            Q(brand__name__icontains=q)
+        )
 
     cat = request.GET.get("cat")
     if cat:
@@ -50,19 +52,16 @@ def product_detail(request, slug):
     )
     return render(request, "catalog/product_detail.html", {"p": p})
 
-# catalog/views.py
-from django.core.exceptions import PermissionDenied
-from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404
-from django.core.exceptions import PermissionDenied
 
-from .forms import ProductForm
-from .models import Product
-
-def product_create(request):
-    # 403 for non-staff (meets your AC)
+# ---------- Staff guard ----------
+def _require_staff(request):
     if not (request.user.is_authenticated and request.user.is_staff):
         raise PermissionDenied("You must be staff to manage products.")
+
+
+# ---------- Staff: create ----------
+def product_create(request):
+    _require_staff(request)
 
     if request.method == "POST":
         form = ProductForm(request.POST)
@@ -75,3 +74,24 @@ def product_create(request):
         form = ProductForm()
 
     return render(request, "catalog/product_form.html", {"form": form})
+
+
+# ---------- Staff: update ----------
+def product_update(request, slug):
+    _require_staff(request)
+
+    product = get_object_or_404(Product, slug=slug)
+    form = ProductForm(request.POST or None, instance=product)
+
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Product “{product.name}” updated.")
+            return redirect("catalog:product_detail", slug=product.slug)
+        messages.error(request, "Please correct the errors below.")
+
+    return render(
+        request,
+        "catalog/product_form.html",
+        {"form": form, "is_edit": True, "p": product},
+    )
