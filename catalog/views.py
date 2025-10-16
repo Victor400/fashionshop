@@ -111,3 +111,14 @@ def product_delete(request, slug):
 
     # GET = show confirmation
     return render(request, "catalog/product_confirm_delete.html", {"p": product})
+
+from django.shortcuts import redirect, get_object_or_404
+from .models import Product
+
+def add_to_bag(request, sku):
+    p = get_object_or_404(Product, sku=sku)
+    bag = request.session.get("cart", {})
+    bag[sku] = int(bag.get(sku, 0)) + 1
+    request.session["cart"] = bag
+    request.session.modified = True
+    return redirect("catalog:product_detail", slug=p.slug)

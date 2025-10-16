@@ -25,11 +25,11 @@
   <div class="row">
     <!-- Image -->
     <div class="col-md-6 mb-4">
-      <div class="border rounded p-2 bg-white">
+      <div class="border rounded p-2 bg-white product-detail-media">
         <img
           class="img-fluid d-block mx-auto"
           alt="{{ p.name }}"
-          src="{% static 'catalog/img/products/' %}{{ p.sku|lower }}.jpg">
+          src="{% static 'catalog/img/products/' %}{{ p.sku|lower }}.jpg">>
       </div>
     </div>
 
@@ -39,9 +39,10 @@
         <h1 class="h3 mb-2">{{ p.name }}</h1>
 
         {% if request.user.is_staff %}
-          <a href="{% url 'catalog:product_update' p.slug %}" class="btn btn-outline-dark btn-sm ml-3">
-            Edit
-          </a>
+          <div class="btn-group">
+            <a href="{% url 'catalog:product_update' p.slug %}" class="btn btn-outline-dark btn-sm">Edit</a>
+            <a href="{% url 'catalog:product_delete' p.slug %}" class="btn btn-outline-danger btn-sm">Delete</a>
+          </div>
         {% endif %}
       </div>
 
@@ -55,7 +56,11 @@
         <li><strong class="text-dark">SKU:</strong> {{ p.sku }}</li>
         <li>
           <strong class="text-dark">Stock:</strong>
-          {% if p.stock > 0 %}In stock ({{ p.stock }}){% else %}<span class="text-danger">Out of stock</span>{% endif %}
+          {% if p.stock > 0 %}
+            In stock ({{ p.stock }})
+          {% else %}
+            <span class="text-danger">Out of stock</span>
+          {% endif %}
         </li>
       </ul>
 
@@ -64,7 +69,8 @@
       {% endif %}
 
       {% if p.stock > 0 %}
-        <a href="#" class="btn btn-dark btn-lg">Add to bag</a>
+        <a href="{% url 'catalog:add_to_bag' p.sku %}" class="btn btn-dark btn-lg">Add to bag</a>
+        <a href="{% url 'orders:checkout_create' %}" class="btn btn-outline-dark btn-lg ml-2">Checkout</a>
       {% else %}
         <button class="btn btn-secondary btn-lg" disabled>Out of stock</button>
       {% endif %}
