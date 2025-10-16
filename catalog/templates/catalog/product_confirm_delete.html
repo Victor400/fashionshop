@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Delete {{ p.name }} | FashionShop{% endblock %}
+
+{% block content %}
+<div class="container mt-4 pt-2 mt-lg-5 pt-lg-4">
+  <h1 class="h4 text-danger mb-3">Delete product</h1>
+  <p class="mb-4">
+    Are you sure you want to delete <strong>{{ p.name }}</strong> (SKU: {{ p.sku }})?
+    This action cannot be undone.
+  </p>
+
+  {# Optional: staff action shortcuts OUTSIDE the form #}
+  {% if request.user.is_staff %}
+    <div class="mb-3">
+      <a href="{% url 'catalog:product_update' p.slug %}" class="btn btn-outline-dark btn-sm">Edit instead</a>
+      <a href="{% url 'catalog:product_detail' p.slug %}" class="btn btn-outline-secondary btn-sm">Back to product</a>
+    </div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger mr-2">Yes, delete</button>
+    <a href="{% url 'catalog:product_detail' p.slug %}" class="btn btn-outline-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

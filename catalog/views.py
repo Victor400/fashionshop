@@ -95,3 +95,19 @@ def product_update(request, slug):
         "catalog/product_form.html",
         {"form": form, "is_edit": True, "p": product},
     )
+
+
+# ---------- Staff: delete ----------
+def product_delete(request, slug):
+    _require_staff(request)
+
+    product = get_object_or_404(Product, slug=slug)
+
+    if request.method == "POST":
+        name = product.name
+        product.delete()
+        messages.success(request, f"Product “{name}” deleted.")
+        return redirect("catalog:product_list")
+
+    # GET = show confirmation
+    return render(request, "catalog/product_confirm_delete.html", {"p": product})
