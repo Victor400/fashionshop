@@ -113,24 +113,27 @@ def product_delete(request, slug):
     # GET = show confirmation
     return render(request, "catalog/product_confirm_delete.html", {"p": product})
 
-#---------- Public: add to bag -----------
-@require_http_methods(["GET", "POST"])
-def add_to_bag(request, sku):
-    # Only add active & in-stock products
-    p = get_object_or_404(Product.objects.select_related("brand", "category"),
-                          sku=sku, is_active=True)
+# ---------- Public: add to bag (POST -> redirect to checkout) ----------
+from django.views.decorators.http import require_http_methods
 
+@require_http_methods(["POST"])  # POST is safer; enforces CSRF
+def add_to_bag(request, sku):
+    p = get_object_or_404(
+        Product.objects.select_related("brand", "category"),
+        sku=sku,
+        is_active=True,
+    )
+
+    # block adding if out of stock
     if getattr(p, "stock", 1) <= 0:
         messages.warning(request, "That item is currently out of stock.")
-        return redirect(reverse("catalog:product_detail", args=[p.slug]))
+        return redirect("catalog:product_detail", slug=p.slug)
 
-    bag = request.session.get("cart", {})
-    bag[sku] = int(bag.get(sku, 0)) + 1
-    request.session["cart"] = bag
+    cart = request.session.get("cart", {})
+    cart[sku] = int(cart.get(sku, 0)) + 1
+    request.session["cart"] = cart
     request.session.modified = True
 
-    messages.success(request, f"Added “{p.name}” to your bag.")
-
-    # go back to where the user came from (or product detail)
-    next_url = request.GET.get("next") or reverse("catalog:product_detail", args=[p.slug])
-    return redirect(next_url)
+    messages.success(request, f'Added “{p.name}” to your bag.')
+    # go straight to checkout so the user sees updated totals
+    return redirect("orders:checkout_create")
