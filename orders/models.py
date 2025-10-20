@@ -1,9 +1,8 @@
-from django.db import models
-
-# Create your models here.
+# orders/models.py
 from decimal import Decimal, ROUND_HALF_UP
 from django.conf import settings
 from django.db import models
+from django.utils import timezone  # for created_at default
 
 SCHEMA = "fashionshop"  # schema from DB
 
@@ -17,11 +16,12 @@ class Order(models.Model):
     )
     status = models.CharField(max_length=20, db_column="status", default="pending")
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, db_column="total_amount")
-    created_at = models.DateTimeField(db_column="created_at")  # DB default/trigger handles this
+    # Ensure NOT NULL inserts even though the table is unmanaged
+    created_at = models.DateTimeField(db_column="created_at", default=timezone.now, editable=False)
 
     class Meta:
         db_table = f'"{SCHEMA}"."order"'
-        managed = False
+        managed = False 
 
     def __str__(self):
         return f"Order #{self.pk} ({self.status})"
@@ -45,12 +45,11 @@ class OrderItem(models.Model):
 
     class Meta:
         db_table = f'"{SCHEMA}"."order_item"'
-        managed = False
+        managed = False  # existing table
 
     def __str__(self):
         return f"{self.product_id} x{self.quantity}"
 
     @property
     def line_total(self):
-        from .models import Order
         return Order.q2(Decimal(self.price_each) * self.quantity)
