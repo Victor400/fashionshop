@@ -114,10 +114,26 @@ def product_delete(request, slug):
     return render(request, "catalog/product_confirm_delete.html", {"p": product})
 
 # ---------- Public: add to bag (POST -> redirect to checkout) ----------
-from django.views.decorators.http import require_http_methods
-
-@require_http_methods(["POST"])  # POST is safer; enforces CSRF
+@require_http_methods(["POST"])
 def add_to_bag(request, sku):
+    p = get_object_or_404(
+        Product.objects.select_related("brand", "category"),
+        sku=sku, is_active=True
+    )
+
+    # Optional: block if out of stock
+    if getattr(p, "stock", 1) <= 0:
+        messages.warning(request, "That item is currently out of stock.")
+        return redirect("catalog:product_detail", slug=p.slug)
+
+    cart = request.session.get("cart", {})
+    cart[sku] = int(cart.get(sku, 0)) + 1
+    request.session["cart"] = cart
+    request.session.modified = True
+
+    messages.success(request, f'Added “{p.name}” to your bag.')
+    # Go straight to checkout (this is the key)
+    return redirect("orders:checkout_create")
     p = get_object_or_404(
         Product.objects.select_related("brand", "category"),
         sku=sku,
