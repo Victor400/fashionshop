@@ -4,7 +4,8 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
-
+from django.urls import reverse
+from django.views.decorators.http import require_http_methods
 from .forms import ProductForm
 from .models import Product
 
@@ -112,13 +113,24 @@ def product_delete(request, slug):
     # GET = show confirmation
     return render(request, "catalog/product_confirm_delete.html", {"p": product})
 
-from django.shortcuts import redirect, get_object_or_404
-from .models import Product
-
+#---------- Public: add to bag -----------
+@require_http_methods(["GET", "POST"])
 def add_to_bag(request, sku):
-    p = get_object_or_404(Product, sku=sku)
+    # Only add active & in-stock products
+    p = get_object_or_404(Product.objects.select_related("brand", "category"),
+                          sku=sku, is_active=True)
+
+    if getattr(p, "stock", 1) <= 0:
+        messages.warning(request, "That item is currently out of stock.")
+        return redirect(reverse("catalog:product_detail", args=[p.slug]))
+
     bag = request.session.get("cart", {})
     bag[sku] = int(bag.get(sku, 0)) + 1
     request.session["cart"] = bag
     request.session.modified = True
-    return redirect("catalog:product_detail", slug=p.slug)
+
+    messages.success(request, f"Added “{p.name}” to your bag.")
+
+    # go back to where the user came from (or product detail)
+    next_url = request.GET.get("next") or reverse("catalog:product_detail", args=[p.slug])
+    return redirect(next_url)

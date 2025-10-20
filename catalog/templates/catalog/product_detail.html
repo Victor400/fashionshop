@@ -29,7 +29,7 @@
         <img
           class="img-fluid d-block mx-auto"
           alt="{{ p.name }}"
-          src="{% static 'catalog/img/products/' %}{{ p.sku|lower }}.jpg">>
+          src="{% static 'catalog/img/products/' %}{{ p.sku|lower }}.jpg">
       </div>
     </div>
 
@@ -69,7 +69,12 @@
       {% endif %}
 
       {% if p.stock > 0 %}
-        <a href="{% url 'catalog:add_to_bag' p.sku %}" class="btn btn-dark btn-lg">Add to bag</a>
+        <!-- Add to bag (POST) keeps you on this page via hidden next -->
+        <form method="post" action="{% url 'catalog:add_to_bag' p.sku %}" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path|urlencode }}">
+          <button type="submit" class="btn btn-dark btn-lg">Add to bag</button>
+        </form>
         <a href="{% url 'orders:checkout_create' %}" class="btn btn-outline-dark btn-lg ml-2">Checkout</a>
       {% else %}
         <button class="btn btn-secondary btn-lg" disabled>Out of stock</button>
