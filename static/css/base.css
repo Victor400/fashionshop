@@ -219,6 +219,29 @@ main {
     display: block;
 }
 
+/* Align table cells nicely */
+.table td, .table th { vertical-align: middle; }
+
+/* Base width for the qty control */
+.bag-qty .bag-qty-group { width: 170px; }
+.bag-qty-input { text-align: center; }
+
+/* Tighten a bit on narrow phones */
+@media (max-width: 400px) {
+  .bag-qty .bag-qty-group { width: 150px; }
+}
+
+/* Tablets (576–991px): give a little more room */
+@media (min-width: 576px) and (max-width: 991.98px) {
+  .bag-qty .bag-qty-group { width: 180px; }
+}
+
+/* Desktops (≥992px): comfy width */
+@media (min-width: 992px) {
+  .bag-qty .bag-qty-group { width: 190px; }
+}
+
+
 @media (min-width:992px) {
 
     /* lg desktop stage */
