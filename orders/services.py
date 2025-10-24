@@ -1,56 +1,141 @@
+# orders/services.py
+from __future__ import annotations
+"""
+Service layer for Orders:
+- Ensures a mapping from Django users to fashionshop.app_user (unmanaged)
+- Builds Order + OrderItem rows from a session/cart payload
+- Records payments and advances order status on success
+"""
+
 from decimal import Decimal
+from typing import Optional, Iterable, Mapping
+
 from django.db import transaction, connection
 from django.utils import timezone
-from catalog.models import Product
-from .models import Order, OrderItem, AppUser
 
-def ensure_app_user_for_django_user(dj_user) -> AppUser | None:
+from catalog.models import Product
+from .models import Order, OrderItem, AppUser, Payment
+
+
+def ensure_app_user_for_django_user(dj_user) -> Optional[AppUser]:
+    """
+    Ensure an app-level user exists in Postgres (fashionshop.app_user) for the
+    given Django user. Upserts by email and returns a lightweight AppUser
+    instance with the newly created/updated id. Returns None for anonymous or
+    users without an email.
+    """
     if not getattr(dj_user, "is_authenticated", False):
         return None
-    email = (dj_user.email or "").strip()
+    email = (getattr(dj_user, "email", "") or "").strip()
     if not email:
         return None
-    full_name = (getattr(dj_user, "get_full_name", lambda: "")() or dj_user.get_username()).strip()
-
-    # Upsert into fashionshop.app_user by email and return id
+    full_name = ""
+    if hasattr(dj_user, "get_full_name"):
+        full_name = dj_user.get_full_name() or ""
+    if not full_name:
+        full_name = getattr(dj_user, "get_username", lambda: "")() or ""
+    full_name = full_name.strip()
     with connection.cursor() as cur:
         cur.execute(
-            '''
+            """
             INSERT INTO "fashionshop"."app_user"(email, full_name, created_at)
             VALUES (%s, %s, NOW())
-            ON CONFLICT (email) DO UPDATE SET full_name = EXCLUDED.full_name
+            ON CONFLICT (email) DO UPDATE
+                SET full_name = EXCLUDED.full_name
             RETURNING id;
-            ''',
-            [email, full_name]
+            """,
+            [email, full_name],
         )
         app_user_id = cur.fetchone()[0]
     return AppUser(id=app_user_id)
 
-@transaction.atomic
-def create_order_from_cart(dj_user, cart_items):
-    app_user = ensure_app_user_for_django_user(dj_user)
 
+@transaction.atomic
+def create_order_from_cart(
+    dj_user,
+    cart_items: Iterable[Mapping[str, object]],
+) -> Order:
+    """
+    Create an Order (status='pending') and associated OrderItem rows from a
+    simple cart structure, e.g. [{'sku': 'ABC123', 'qty': 2}, ...].
+
+    - Links the order to fashionshop.app_user (if the Django user is known)
+    - Ignores non-positive quantities
+    - Quantizes monetary values to 2dp
+    - Wraps the entire operation in a single transaction
+
+    Returns:
+        Order: The persisted order with total_amount computed.
+    """
+    app_user = ensure_app_user_for_django_user(dj_user)
     order = Order.objects.create(
-        user=app_user,                 # FK now valid (or null)
+        user=app_user,
         status="pending",
         total_amount=Decimal("0.00"),
         created_at=timezone.now(),
     )
-
     running = Decimal("0.00")
     for item in cart_items:
-        sku = item["sku"]; qty = int(item["qty"])
+        sku = str(item["sku"]).strip()
+        qty = int(item.get("qty", 0) or 0)
+        if qty <= 0:
+            continue
         product = Product.objects.get(sku=sku)
-
         unit = Order.q2(Decimal(product.price))
         line = Order.q2(unit * qty)
-
         OrderItem.objects.create(
-            order=order, product=product,
-            quantity=qty, price_each=unit,
+            order=order,
+            product=product,
+            quantity=qty,
+            price_each=unit,
         )
         running += line
-
     order.total_amount = Order.q2(running)
     order.save(update_fields=["total_amount"])
     return order
+
+
+def record_payment(
+    order: Order,
+    *,
+    provider: str,
+    method: str,
+    status: str,
+    amount: Decimal,
+    provider_ref: Optional[str] = None,
+    raw_payload: Optional[dict] = None,
+) -> Payment:
+    """
+    Persist a payment row and update the owning order's status if successful.
+
+    Args:
+        order: The target order.
+        provider: Payment processor (e.g., 'stripe').
+        method: One of Payment.Method enum values (must match DB).
+        status: One of Payment.Status enum values (must match DB).
+        amount: Gross payment amount; quantized to 2dp.
+        provider_ref: Optional processor reference (intent id, charge id, etc.).
+        raw_payload: Optional raw data (not stored here; reserved for future use).
+
+    Returns:
+        Payment: The created payment record.
+
+    Raises:
+        ValueError: If method or status are not valid enum literals.
+    """
+    if method not in Payment.Method.values:
+        raise ValueError(f"Invalid payment method: {method!r}. Allowed: {list(Payment.Method.values)}")
+    if status not in Payment.Status.values:
+        raise ValueError(f"Invalid payment status: {status!r}. Allowed: {list(Payment.Status.values)}")
+    payment = Payment.objects.create(
+        order=order,
+        provider=provider,
+        method=method,
+        status=status,
+        amount=Order.q2(Decimal(amount)),
+        provider_ref=provider_ref,
+    )
+    if status == Payment.Status.SUCCESS:
+        order.status = "paid"
+        order.save(update_fields=["status"])
+    return payment
