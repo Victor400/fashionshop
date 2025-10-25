@@ -1,14 +1,15 @@
-
+# orders/models.py
 from decimal import Decimal, ROUND_HALF_UP
 from django.db import models
 from django.utils import timezone
 
 SCHEMA = "fashionshop"
 
+
 class AppUser(models.Model):
-    """Unmanaged mapping to fashionshop.app_user"""
+    """Unmanaged mapping to fashionshop.app_user."""
     id = models.BigAutoField(primary_key=True, db_column="id")
-    email = models.TextField(db_column="email")  # citext in DB
+    email = models.TextField(db_column="email")
     full_name = models.CharField(max_length=120, db_column="full_name", blank=True, null=True)
     created_at = models.DateTimeField(db_column="created_at")
 
@@ -19,7 +20,9 @@ class AppUser(models.Model):
     def __str__(self) -> str:
         return self.email or f"app_user:{self.pk}"
 
+
 class Order(models.Model):
+    """Unmanaged mapping to fashionshop.order."""
     user = models.ForeignKey(
         AppUser, null=True, blank=True,
         on_delete=models.SET_NULL,
@@ -30,6 +33,20 @@ class Order(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, db_column="total_amount")
     created_at = models.DateTimeField(db_column="created_at", default=timezone.now, editable=False)
 
+    # ── New buyer & shipping fields ────────────────────────────────────────────
+    buyer_name = models.TextField(db_column="buyer_name", blank=True, null=True)
+    buyer_email = models.TextField(db_column="buyer_email", blank=True, null=True)   # citext is fine
+    buyer_phone = models.TextField(db_column="buyer_phone", blank=True, null=True)
+
+    ship_address1 = models.TextField(db_column="ship_address1", blank=True, null=True)
+    ship_address2 = models.TextField(db_column="ship_address2", blank=True, null=True)
+    ship_city = models.TextField(db_column="ship_city", blank=True, null=True)
+    ship_postcode = models.TextField(db_column="ship_postcode", blank=True, null=True)
+    ship_country = models.TextField(db_column="ship_country", blank=True, null=True)
+
+    notes = models.TextField(db_column="notes", blank=True, null=True)
+    # ─────────────────────────────────────────────────────────────────────────
+
     class Meta:
         db_table = f'"{SCHEMA}"."order"'
         managed = False
@@ -39,11 +56,12 @@ class Order(models.Model):
 
     @staticmethod
     def q2(x: Decimal) -> Decimal:
-        """Quantize to 2dp with bankers' rounding disabled (HALF_UP)."""
+        """Quantize to 2dp (HALF_UP)."""
         return x.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
 class OrderItem(models.Model):
+    """Unmanaged mapping to fashionshop.order_item."""
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE,
         related_name="items", db_column="order_id"
@@ -70,9 +88,9 @@ class OrderItem(models.Model):
 class Payment(models.Model):
     """
     Unmanaged mapping to fashionshop.payment.
-    Postgres ENUMs:
-      - fashionshop.payment_method:   'card', 'paypal', 'cod'
-      - fashionshop.payment_status:   'pending', 'successful', 'failed'
+    Enums must match the Postgres ENUMs:
+      - fashionshop.payment_method:  'card', 'paypal', 'cod'
+      - fashionshop.payment_status:  'pending', 'successful', 'failed'
     """
     class Method(models.TextChoices):
         CARD = "card", "Card"
@@ -88,7 +106,7 @@ class Payment(models.Model):
         Order, on_delete=models.CASCADE,
         related_name="payments", db_column="order_id"
     )
-    provider = models.CharField(max_length=40, db_column="provider")  # e.g. 'stripe'
+    provider = models.CharField(max_length=40, db_column="provider")
     method = models.CharField(max_length=20, choices=Method.choices, db_column="method")
     status = models.CharField(max_length=20, choices=Status.choices, db_column="status")
     amount = models.DecimalField(max_digits=10, decimal_places=2, db_column="amount")

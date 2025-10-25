@@ -6,10 +6,15 @@ from django.views.decorators.http import require_http_methods, require_GET
 
 from .models import Order, Payment
 from .services import create_order_from_cart, record_payment
+from .forms import CheckoutDetailsForm
 
 
 @require_http_methods(["GET", "POST"])
 def checkout_create(request):
+    """
+    Build an Order from the session cart and redirect to its detail page.
+    (Cart is intentionally NOT cleared here so the user can still change it.)
+    """
     cart = request.session.get("cart", {}) or {}
     normalized = []
     for sku, qty in cart.items():
@@ -30,15 +35,14 @@ def checkout_create(request):
         messages.error(request, f"Sorry, we couldn't create your order: {exc}")
         return redirect("catalog:product_list")
 
-    # # Clear bag AFTER order creation
-    # request.session["cart"] = {}
-    # request.session.modified = True
-
     messages.success(request, f"Order #{order.pk} created (status: {order.status}).")
     return redirect("orders:order_detail", pk=order.pk)
 
 
 def order_detail(request, pk):
+    """
+    Show order summary with items and totals.
+    """
     order = get_object_or_404(
         Order.objects.prefetch_related("items__product"),
         pk=pk,
@@ -46,8 +50,29 @@ def order_detail(request, pk):
     return render(request, "orders/order_detail.html", {"order": order})
 
 
+@require_http_methods(["GET", "POST"])
+def order_checkout(request, pk):
+    """
+    Collect buyer/contact/shipping details for an existing pending order.
+    """
+    order = get_object_or_404(Order, pk=pk)
+
+    if request.method == "POST":
+        form = CheckoutDetailsForm(request.POST, instance=order)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Details saved. You can now pay.")
+            return redirect("orders:pay_mock", pk=order.pk)  # replace with Stripe later
+    else:
+        form = CheckoutDetailsForm(instance=order)
+
+    return render(request, "orders/order_checkout.html", {"order": order, "form": form})
+
+
 def pay_mock(request, pk):
-    """Very simple mock payment page with Success / Fail buttons."""
+    """
+    Very simple mock payment page with Success / Fail buttons.
+    """
     order = get_object_or_404(Order, pk=pk)
     return render(request, "orders/pay_mock.html", {"order": order})
 
@@ -56,6 +81,7 @@ def pay_mock(request, pk):
 def payment_return(request):
     """
     /orders/return/?order=<id>&status=success|failure&ref=MOCK-123
+    Creates a Payment row and marks the order paid on success.
     """
     order_id = request.GET.get("order")
     result = request.GET.get("status")
@@ -67,7 +93,6 @@ def payment_return(request):
 
     order = get_object_or_404(Order, pk=order_id)
 
-    # Prevent double capture UX
     if str(order.status).lower() == "paid":
         messages.info(request, f"Order #{order.pk} is already paid.")
         return redirect("orders:order_detail", pk=order.pk)
@@ -77,14 +102,15 @@ def payment_return(request):
     payment = record_payment(
         order=order,
         provider="mock",
-        method=Payment.Method.CARD,
-        status=status,
+        method=Payment.Method.CARD,     
+        status=status,                  
         amount=Decimal(order.total_amount),
         provider_ref=ref,
     )
 
     if payment.status == Payment.Status.SUCCESS:
         messages.success(request, f"Payment successful. Order #{order.pk} is now paid.")
+        # clear cart now that a successful payment happened
         request.session["cart"] = {}
         request.session.modified = True
     else:
