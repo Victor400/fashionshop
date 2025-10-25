@@ -219,6 +219,9 @@ main {
     display: block;
 }
 
+
+.form-control.form-control-sm { padding-top: .25rem; padding-bottom: .25rem; }
+
 /* Align table cells nicely */
 .table td, .table th { vertical-align: middle; }
 

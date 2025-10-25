@@ -3,33 +3,140 @@
 
 {% block content %}
 <div class="container mt-4 pt-2 mt-lg-5 pt-lg-4">
-  <h1 class="h4 mb-3">Shipping & contact for Order #{{ order.pk }}</h1>
 
-  <form method="post" class="bg-white border rounded p-3">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    <div class="row">
-      <div class="col-md-6">
-        <h2 class="h6">Buyer</h2>
-        <div class="form-group">{{ form.buyer_name.label_tag }} {{ form.buyer_name }}</div>
-        <div class="form-group">{{ form.buyer_email.label_tag }} {{ form.buyer_email }}</div>
-        <div class="form-group">{{ form.buyer_phone.label_tag }} {{ form.buyer_phone }}</div>
-      </div>
-      <div class="col-md-6">
-        <h2 class="h6">Shipping address</h2>
-        <div class="form-group">{{ form.ship_address1.label_tag }} {{ form.ship_address1 }}</div>
-        <div class="form-group">{{ form.ship_address2.label_tag }} {{ form.ship_address2 }}</div>
-        <div class="form-row">
-          <div class="form-group col-md-6">{{ form.ship_city.label_tag }} {{ form.ship_city }}</div>
-          <div class="form-group col-md-6">{{ form.ship_postcode.label_tag }} {{ form.ship_postcode }}</div>
+  <!-- Heading + meta -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h4 mb-0">Shipping & contact — Order #{{ order.pk }}</h1>
+    <span class="badge badge-secondary text-uppercase">{{ order.status }}</span>
+  </div>
+  <p class="text-muted small mb-4">We’ll only use these details to deliver your order and send updates.</p>
+
+  <div class="row">
+    <!-- Form -->
+    <div class="col-lg-8 mb-4">
+      <form method="post" class="bg-white border rounded p-3 p-md-4 shadow-sm">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger mb-3">
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+
+        <div class="row">
+          <!-- Buyer -->
+          <div class="col-md-6 mb-3">
+            <h2 class="h6 text-uppercase text-muted mb-3">Buyer</h2>
+
+            <div class="form-group">
+              {{ form.buyer_name.label_tag }}
+              {{ form.buyer_name }}
+              {% for e in form.buyer_name.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="form-group">
+              {{ form.buyer_email.label_tag }}
+              {{ form.buyer_email }}
+              <small class="form-text text-muted">We’ll send your receipt here.</small>
+              {% for e in form.buyer_email.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="form-group">
+              {{ form.buyer_phone.label_tag }}
+              {{ form.buyer_phone }}
+              <small class="form-text text-muted">Optional, for delivery updates.</small>
+              {% for e in form.buyer_phone.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+            </div>
+          </div>
+
+          <!-- Shipping -->
+          <div class="col-md-6 mb-3">
+            <h2 class="h6 text-uppercase text-muted mb-3">Shipping address</h2>
+
+            <div class="form-group">
+              {{ form.ship_address1.label_tag }}
+              {{ form.ship_address1 }}
+              {% for e in form.ship_address1.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="form-group">
+              {{ form.ship_address2.label_tag }}
+              {{ form.ship_address2 }}
+              {% for e in form.ship_address2.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                {{ form.ship_city.label_tag }}
+                {{ form.ship_city }}
+                {% for e in form.ship_city.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="form-group col-md-6">
+                {{ form.ship_postcode.label_tag }}
+                {{ form.ship_postcode }}
+                {% for e in form.ship_postcode.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+              </div>
+            </div>
+
+            <div class="form-group">
+              {{ form.ship_country.label_tag }}
+              {{ form.ship_country }}
+              {% for e in form.ship_country.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+            </div>
+          </div>
         </div>
-        <div class="form-group">{{ form.ship_country.label_tag }} {{ form.ship_country }}</div>
-      </div>
-    </div>
-    <div class="form-group">{{ form.notes.label_tag }} {{ form.notes }}</div>
 
-    <button class="btn btn-dark">Save details</button>
-    <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-outline-secondary ml-2">Cancel</a>
-  </form>
+        <div class="form-group">
+          {{ form.notes.label_tag }}
+          {{ form.notes }}
+          <small class="form-text text-muted">Delivery notes or helpful instructions for the courier.</small>
+          {% for e in form.notes.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+        </div>
+
+        <!-- Actions -->
+        <div class="d-none d-md-flex justify-content-between pt-2">
+          <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-outline-secondary">Cancel</a>
+          <button class="btn btn-dark">Save details</button>
+        </div>
+
+        <!-- Sticky actions on small screens -->
+        <div class="d-md-none position-sticky" style="bottom:0; z-index: 5;">
+          <div class="bg-white border-top p-2 d-flex justify-content-between">
+            <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-outline-secondary">Cancel</a>
+            <button class="btn btn-dark">Save details</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Order summary -->
+    <aside class="col-lg-4">
+      <div class="bg-white border rounded p-3 p-md-4 shadow-sm">
+        <h3 class="h6 text-uppercase text-muted mb-3">Order summary</h3>
+        <ul class="list-unstyled small mb-3">
+          {% for it in order.items.all %}
+            <li class="d-flex justify-content-between">
+              <span>
+                {% if it.product %}{{ it.product.name }}{% else %}#{{ it.product_id }}{% endif %}
+                <span class="text-muted">× {{ it.quantity }}</span>
+              </span>
+              <span>£{{ it.line_total|floatformat:2 }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+        <hr class="my-2">
+        <div class="d-flex justify-content-between font-weight-bold">
+          <span>Total</span>
+          <span>£{{ order.total_amount|floatformat:2 }}</span>
+        </div>
+      </div>
+
+      {% if order.status != 'paid' %}
+        <div class="mt-3">
+          <a href="{% url 'orders:pay_mock' order.pk %}" class="btn btn-dark btn-block">Continue to payment</a>
+          <small class="text-muted d-block text-center mt-2">You can pay after saving your details.</small>
+        </div>
+      {% endif %}
+    </aside>
+  </div>
 </div>
 {% endblock %}
