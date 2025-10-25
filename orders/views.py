@@ -43,11 +43,13 @@ def order_detail(request, pk):
     """
     Show order summary with items and totals.
     """
+def order_detail(request, pk):
     order = get_object_or_404(
-        Order.objects.prefetch_related("items__product"),
+        Order.objects.prefetch_related("items__product", "payments"),
         pk=pk,
     )
     return render(request, "orders/order_detail.html", {"order": order})
+
 
 
 @require_http_methods(["GET", "POST"])

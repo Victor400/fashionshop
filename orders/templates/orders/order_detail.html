@@ -12,13 +12,41 @@
     {% if order.user %}
       <span class="text-muted mr-2">Customer: {{ order.user }}</span>
     {% endif %}
-    <span class="text-muted mr-2">Placed: {{ order.created_at }}</span>
+    <span class="text-muted mr-2">Placed: {{ order.created_at|date:"Y-m-d H:i" }}</span>
 
-    {# Pay CTA (only if not paid) #}
     {% if order.status != 'paid' %}
       <a href="{% url 'orders:pay_mock' order.pk %}" class="btn btn-dark btn-sm ml-auto">Pay (mock)</a>
     {% endif %}
   </div>
+
+  {# Optional: buyer/contact + shipping summary #}
+  {% if order.buyer_name or order.buyer_email or order.buyer_phone or order.ship_address1 %}
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <div class="border rounded p-3 bg-white h-100">
+          <h2 class="h6 mb-2">Buyer</h2>
+          <ul class="list-unstyled mb-0 small text-muted">
+            {% if order.buyer_name %}<li><strong class="text-dark">Name:</strong> {{ order.buyer_name }}</li>{% endif %}
+            {% if order.buyer_email %}<li><strong class="text-dark">Email:</strong> {{ order.buyer_email }}</li>{% endif %}
+            {% if order.buyer_phone %}<li><strong class="text-dark">Phone:</strong> {{ order.buyer_phone }}</li>{% endif %}
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-6 mt-3 mt-md-0">
+        <div class="border rounded p-3 bg-white h-100">
+          <h2 class="h6 mb-2">Shipping</h2>
+          <ul class="list-unstyled mb-0 small text-muted">
+            {% if order.ship_address1 %}<li>{{ order.ship_address1 }}</li>{% endif %}
+            {% if order.ship_address2 %}<li>{{ order.ship_address2 }}</li>{% endif %}
+            {% if order.ship_city or order.ship_postcode %}
+              <li>{{ order.ship_city }} {% if order.ship_postcode %}{{ order.ship_postcode }}{% endif %}</li>
+            {% endif %}
+            {% if order.ship_country %}<li>{{ order.ship_country }}</li>{% endif %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 
   {% if order.items.all %}
     <div class="table-responsive mb-3">
@@ -57,6 +85,23 @@
     </div>
   {% else %}
     <div class="alert alert-light border">No items on this order.</div>
+  {% endif %}
+
+  {# Payment history (handy while testing) #}
+  {% if order.payments.all %}
+    <div class="mb-3">
+      <h2 class="h6">Payments</h2>
+      <ul class="list-unstyled small mb-0">
+        {% for pm in order.payments.all %}
+          <li>
+            <strong>{{ pm.provider }}/{{ pm.method }}</strong> — {{ pm.status }}
+            for £{{ pm.amount|floatformat:2 }}
+            <span class="text-muted">({{ pm.created_at|date:"Y-m-d H:i" }})</span>
+            {% if pm.provider_ref %}<span class="text-muted">ref: {{ pm.provider_ref }}</span>{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
   {% endif %}
 
   <div class="d-flex justify-content-between">
