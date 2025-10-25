@@ -19,22 +19,24 @@ from .models import Order, OrderItem, AppUser, Payment
 
 def ensure_app_user_for_django_user(dj_user) -> Optional[AppUser]:
     """
-    Ensure an app-level user exists in Postgres (fashionshop.app_user) for the
-    given Django user. Upserts by email and returns a lightweight AppUser
-    instance with the newly created/updated id. Returns None for anonymous or
-    users without an email.
+    Upsert a row in fashionshop.app_user for the given Django user (by email)
+    and return a lightweight AppUser carrying the id. Returns None if the
+    request user is anonymous or has no email.
     """
     if not getattr(dj_user, "is_authenticated", False):
         return None
+
     email = (getattr(dj_user, "email", "") or "").strip()
     if not email:
         return None
+
     full_name = ""
     if hasattr(dj_user, "get_full_name"):
         full_name = dj_user.get_full_name() or ""
     if not full_name:
         full_name = getattr(dj_user, "get_username", lambda: "")() or ""
     full_name = full_name.strip()
+
     with connection.cursor() as cur:
         cur.execute(
             """
@@ -47,6 +49,7 @@ def ensure_app_user_for_django_user(dj_user) -> Optional[AppUser]:
             [email, full_name],
         )
         app_user_id = cur.fetchone()[0]
+
     return AppUser(id=app_user_id)
 
 
@@ -56,33 +59,30 @@ def create_order_from_cart(
     cart_items: Iterable[Mapping[str, object]],
 ) -> Order:
     """
-    Create an Order (status='pending') and associated OrderItem rows from a
-    simple cart structure, e.g. [{'sku': 'ABC123', 'qty': 2}, ...].
-
-    - Links the order to fashionshop.app_user (if the Django user is known)
-    - Ignores non-positive quantities
-    - Quantizes monetary values to 2dp
-    - Wraps the entire operation in a single transaction
-
-    Returns:
-        Order: The persisted order with total_amount computed.
+    Create an Order (status='pending') and associated OrderItem rows
+    from a structure like [{'sku': 'ABC123', 'qty': 2}, ...].
+    Quantizes money to 2dp and runs in a single transaction.
     """
     app_user = ensure_app_user_for_django_user(dj_user)
+
     order = Order.objects.create(
         user=app_user,
         status="pending",
         total_amount=Decimal("0.00"),
         created_at=timezone.now(),
     )
+
     running = Decimal("0.00")
     for item in cart_items:
         sku = str(item["sku"]).strip()
         qty = int(item.get("qty", 0) or 0)
         if qty <= 0:
             continue
+
         product = Product.objects.get(sku=sku)
         unit = Order.q2(Decimal(product.price))
         line = Order.q2(unit * qty)
+
         OrderItem.objects.create(
             order=order,
             product=product,
@@ -90,6 +90,7 @@ def create_order_from_cart(
             price_each=unit,
         )
         running += line
+
     order.total_amount = Order.q2(running)
     order.save(update_fields=["total_amount"])
     return order
@@ -106,27 +107,14 @@ def record_payment(
     raw_payload: Optional[dict] = None,
 ) -> Payment:
     """
-    Persist a payment row and update the owning order's status if successful.
-
-    Args:
-        order: The target order.
-        provider: Payment processor (e.g., 'stripe').
-        method: One of Payment.Method enum values (must match DB).
-        status: One of Payment.Status enum values (must match DB).
-        amount: Gross payment amount; quantized to 2dp.
-        provider_ref: Optional processor reference (intent id, charge id, etc.).
-        raw_payload: Optional raw data (not stored here; reserved for future use).
-
-    Returns:
-        Payment: The created payment record.
-
-    Raises:
-        ValueError: If method or status are not valid enum literals.
+    Persist a payment and, if successful, set order.status='paid'.
+    `method` and `status` must be valid Payment enum values.
     """
     if method not in Payment.Method.values:
         raise ValueError(f"Invalid payment method: {method!r}. Allowed: {list(Payment.Method.values)}")
     if status not in Payment.Status.values:
         raise ValueError(f"Invalid payment status: {status!r}. Allowed: {list(Payment.Status.values)}")
+
     payment = Payment.objects.create(
         order=order,
         provider=provider,
@@ -135,7 +123,9 @@ def record_payment(
         amount=Order.q2(Decimal(amount)),
         provider_ref=provider_ref,
     )
+
     if status == Payment.Status.SUCCESS:
         order.status = "paid"
         order.save(update_fields=["status"])
+
     return payment

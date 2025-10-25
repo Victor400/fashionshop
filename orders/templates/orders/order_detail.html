@@ -7,12 +7,17 @@
 <div class="container mt-4 pt-2 mt-lg-5 pt-lg-4">
   <h1 class="h4 mb-3">Order #{{ order.pk }}</h1>
 
-  <div class="mb-3">
-    <span class="badge badge-secondary text-uppercase">Status: {{ order.status }}</span>
+  <div class="mb-3 d-flex flex-wrap align-items-center">
+    <span class="badge badge-secondary text-uppercase mr-2">Status: {{ order.status }}</span>
     {% if order.user %}
-      <span class="ml-2 text-muted">Customer: {{ order.user }}</span>
+      <span class="text-muted mr-2">Customer: {{ order.user }}</span>
     {% endif %}
-    <span class="ml-2 text-muted">Placed: {{ order.created_at }}</span>
+    <span class="text-muted mr-2">Placed: {{ order.created_at }}</span>
+
+    {# Pay CTA (only if not paid) #}
+    {% if order.status != 'paid' %}
+      <a href="{% url 'orders:pay_mock' order.pk %}" class="btn btn-dark btn-sm ml-auto">Pay (mock)</a>
+    {% endif %}
   </div>
 
   {% if order.items.all %}
@@ -38,9 +43,7 @@
               </td>
               <td class="text-right">{{ it.quantity }}</td>
               <td class="text-right">£{{ it.price_each|floatformat:2 }}</td>
-              <td class="text-right">
-                £{{ it.line_total|floatformat:2 }}
-              </td>
+              <td class="text-right">£{{ it.line_total|floatformat:2 }}</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -56,6 +59,11 @@
     <div class="alert alert-light border">No items on this order.</div>
   {% endif %}
 
-  <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-dark">Continue shopping</a>
+  <div class="d-flex justify-content-between">
+    <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-dark">Continue shopping</a>
+    {% if order.status != 'paid' %}
+      <a href="{% url 'orders:pay_mock' order.pk %}" class="btn btn-dark">Pay (mock)</a>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}

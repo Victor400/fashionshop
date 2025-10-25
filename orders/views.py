@@ -4,14 +4,8 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods, require_GET
 
-from .models import Order
-from .services import (
-    create_order_from_cart,
-    record_payment,
-    PAYMENT_METHOD_CARD,
-    PAYMENT_STATUS_SUCCESS,
-    PAYMENT_STATUS_FAILED,
-)
+from .models import Order, Payment
+from .services import create_order_from_cart, record_payment
 
 
 @require_http_methods(["GET", "POST"])
@@ -36,9 +30,9 @@ def checkout_create(request):
         messages.error(request, f"Sorry, we couldn't create your order: {exc}")
         return redirect("catalog:product_list")
 
-    # Clear bag AFTER order creation
-    request.session["cart"] = {}
-    request.session.modified = True
+    # # Clear bag AFTER order creation
+    # request.session["cart"] = {}
+    # request.session.modified = True
 
     messages.success(request, f"Order #{order.pk} created (status: {order.status}).")
     return redirect("orders:order_detail", pk=order.pk)
@@ -78,18 +72,18 @@ def payment_return(request):
         messages.info(request, f"Order #{order.pk} is already paid.")
         return redirect("orders:order_detail", pk=order.pk)
 
-    status = PAYMENT_STATUS_SUCCESS if result == "success" else PAYMENT_STATUS_FAILED
+    status = Payment.Status.SUCCESS if result == "success" else Payment.Status.FAILED
 
     payment = record_payment(
         order=order,
         provider="mock",
-        method=PAYMENT_METHOD_CARD,
+        method=Payment.Method.CARD,
         status=status,
         amount=Decimal(order.total_amount),
         provider_ref=ref,
     )
 
-    if payment.status == PAYMENT_STATUS_SUCCESS:
+    if payment.status == Payment.Status.SUCCESS:
         messages.success(request, f"Payment successful. Order #{order.pk} is now paid.")
         request.session["cart"] = {}
         request.session.modified = True
