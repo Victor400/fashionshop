@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Checkout details | Order #{{ order.pk }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 pt-2 mt-lg-5 pt-lg-4">
+  <h1 class="h4 mb-3">Shipping & contact for Order #{{ order.pk }}</h1>
+
+  <form method="post" class="bg-white border rounded p-3">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="row">
+      <div class="col-md-6">
+        <h2 class="h6">Buyer</h2>
+        <div class="form-group">{{ form.buyer_name.label_tag }} {{ form.buyer_name }}</div>
+        <div class="form-group">{{ form.buyer_email.label_tag }} {{ form.buyer_email }}</div>
+        <div class="form-group">{{ form.buyer_phone.label_tag }} {{ form.buyer_phone }}</div>
+      </div>
+      <div class="col-md-6">
+        <h2 class="h6">Shipping address</h2>
+        <div class="form-group">{{ form.ship_address1.label_tag }} {{ form.ship_address1 }}</div>
+        <div class="form-group">{{ form.ship_address2.label_tag }} {{ form.ship_address2 }}</div>
+        <div class="form-row">
+          <div class="form-group col-md-6">{{ form.ship_city.label_tag }} {{ form.ship_city }}</div>
+          <div class="form-group col-md-6">{{ form.ship_postcode.label_tag }} {{ form.ship_postcode }}</div>
+        </div>
+        <div class="form-group">{{ form.ship_country.label_tag }} {{ form.ship_country }}</div>
+      </div>
+    </div>
+    <div class="form-group">{{ form.notes.label_tag }} {{ form.notes }}</div>
+
+    <button class="btn btn-dark">Save details</button>
+    <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-outline-secondary ml-2">Cancel</a>
+  </form>
+</div>
+{% endblock %}

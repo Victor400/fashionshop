@@ -19,7 +19,18 @@
     {% endif %}
   </div>
 
-  {# Optional: buyer/contact + shipping summary #}
+  {# Prompt to add details if missing #}
+{% if order.status != 'paid' and not order.buyer_name and not order.ship_address1 %}
+  <div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
+    <span>Shipping/contact details are missing.</span>
+    <a href="{% url 'orders:order_checkout' order.pk %}" class="btn btn-sm btn-primary">
+      Add shipping details
+    </a>
+  </div>
+{% endif %}
+
+
+  {# Buyer + Shipping summary #}
   {% if order.buyer_name or order.buyer_email or order.buyer_phone or order.ship_address1 %}
     <div class="row mb-3">
       <div class="col-md-6">
@@ -87,7 +98,6 @@
     <div class="alert alert-light border">No items on this order.</div>
   {% endif %}
 
-  {# Payment history (handy while testing) #}
   {% if order.payments.all %}
     <div class="mb-3">
       <h2 class="h6">Payments</h2>
@@ -106,9 +116,14 @@
 
   <div class="d-flex justify-content-between">
     <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-dark">Continue shopping</a>
-    {% if order.status != 'paid' %}
-      <a href="{% url 'orders:pay_mock' order.pk %}" class="btn btn-dark">Pay (mock)</a>
-    {% endif %}
+    <div>
+      {% if order.status != 'paid' %}
+        <a href="{% url 'orders:order_checkout' order.pk %}" class="btn btn-outline-secondary mr-2">
+          Edit details
+        </a>
+        <a href="{% url 'orders:pay_mock' order.pk %}" class="btn btn-dark">Pay (mock)</a>
+      {% endif %}
+    </div>
   </div>
 </div>
 {% endblock %}
