@@ -1,19 +1,30 @@
+from __future__ import annotations
+
 from decimal import Decimal
 
+from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_http_methods, require_GET
+from django.urls import reverse
+from django.views.decorators.http import require_http_methods, require_GET, require_POST
 
+import stripe
+from .forms import CheckoutDetailsForm
 from .models import Order, Payment
 from .services import create_order_from_cart, record_payment
-from .forms import CheckoutDetailsForm
+
+# Configure Stripe (safe if key missing in local dev)
+stripe.api_key = getattr(settings, "STRIPE_SECRET_KEY", "") or None
 
 
+# -----------------------------
+# Create order from session cart
+# -----------------------------
 @require_http_methods(["GET", "POST"])
 def checkout_create(request):
     """
     Build an Order from the session cart and redirect to its detail page.
-    (Cart is intentionally NOT cleared here so the user can still change it.)
+    (Cart is NOT cleared here so the user can still edit it.)
     """
     cart = request.session.get("cart", {}) or {}
     normalized = []
@@ -39,11 +50,11 @@ def checkout_create(request):
     return redirect("orders:order_detail", pk=order.pk)
 
 
+# -----------------------------
+# Order detail
+# -----------------------------
 def order_detail(request, pk):
-    """
-    Show order summary with items and totals.
-    """
-def order_detail(request, pk):
+    """Show order summary with items, totals, buyer/shipping and payments."""
     order = get_object_or_404(
         Order.objects.prefetch_related("items__product", "payments"),
         pk=pk,
@@ -51,7 +62,9 @@ def order_detail(request, pk):
     return render(request, "orders/order_detail.html", {"order": order})
 
 
-
+# -----------------------------
+# Collect buyer/shipping details
+# -----------------------------
 @require_http_methods(["GET", "POST"])
 def order_checkout(request, pk):
     """
@@ -64,58 +77,163 @@ def order_checkout(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, "Details saved. You can now pay.")
-            return redirect("orders:pay_mock", pk=order.pk)  # replace with Stripe later
+            return redirect("orders:order_detail", pk=order.pk)
     else:
         form = CheckoutDetailsForm(instance=order)
 
     return render(request, "orders/order_checkout.html", {"order": order, "form": form})
 
 
+# -----------------------------
+# Mock payment page (optional)
+# -----------------------------
 def pay_mock(request, pk):
-    """
-    Very simple mock payment page with Success / Fail buttons.
-    """
+    """Very simple mock payment page with Success / Fail buttons."""
     order = get_object_or_404(Order, pk=pk)
     return render(request, "orders/pay_mock.html", {"order": order})
 
 
+# -----------------------------
+# Stripe: create Checkout Session
+# -----------------------------
+@require_POST
+def pay_stripe(request, pk):
+    """
+    Creates a Stripe Checkout Session for the order and redirects to Stripe.
+    No webhooks: we verify on return using session_id.
+    """
+    order = get_object_or_404(Order.objects.prefetch_related("items__product"), pk=pk)
+
+    if str(order.status).lower() == "paid":
+        messages.info(request, f"Order #{order.pk} is already paid.")
+        return redirect("orders:order_detail", pk=order.pk)
+
+    if not stripe.api_key:
+        messages.error(request, "Stripe is not configured.")
+        return redirect("orders:order_detail", pk=order.pk)
+
+    # Build line items from order items (amounts in pence)
+    line_items = []
+    currency = getattr(settings, "STRIPE_CURRENCY", "gbp")
+    for it in order.items.all():
+        name = it.product.name if it.product else f"SKU {it.product_id}"
+        unit_amount = int(Decimal(it.price_each) * 100)  # to pence
+        line_items.append({
+            "price_data": {
+                "currency": currency,
+                "product_data": {"name": name},
+                "unit_amount": unit_amount,
+            },
+            "quantity": it.quantity,
+        })
+
+    success_url = (
+        request.build_absolute_uri(reverse("orders:payment_return"))
+        + f"?order={order.pk}&provider=stripe&session_id={{CHECKOUT_SESSION_ID}}"
+    )
+    cancel_url = request.build_absolute_uri(
+        reverse("orders:order_detail", kwargs={"pk": order.pk})
+    )
+
+    try:
+        session = stripe.checkout.Session.create(
+            mode="payment",
+            line_items=line_items,
+            success_url=success_url,
+            cancel_url=cancel_url,
+        )
+    except Exception as exc:
+        messages.error(request, f"Could not start payment: {exc}")
+        return redirect("orders:order_detail", pk=order.pk)
+
+    return redirect(session.url, permanent=False)
+
+
+# -----------------------------
+# Payment return (Stripe & Mock)
+# -----------------------------
 @require_GET
 def payment_return(request):
     """
-    /orders/return/?order=<id>&status=success|failure&ref=MOCK-123
-    Creates a Payment row and marks the order paid on success.
+    Handles both mock and Stripe returns.
+
+    - Stripe: ?order=<id>&provider=stripe&session_id=cs_test_...
+    - Mock:   ?order=<id>&status=success|failure&ref=...
     """
     order_id = request.GET.get("order")
-    result = request.GET.get("status")
-    ref = request.GET.get("ref") or None
-
     if not order_id:
         messages.error(request, "Missing order reference.")
         return redirect("catalog:product_list")
 
     order = get_object_or_404(Order, pk=order_id)
 
+    # Already paid? Bail early.
     if str(order.status).lower() == "paid":
         messages.info(request, f"Order #{order.pk} is already paid.")
         return redirect("orders:order_detail", pk=order.pk)
 
+    provider = (request.GET.get("provider") or "").lower()
+
+    if provider == "stripe":
+        # Verify the Stripe session
+        session_id = request.GET.get("session_id")
+        if not session_id:
+            messages.error(request, "Missing payment session.")
+            return redirect("orders:order_detail", pk=order.pk)
+
+        try:
+            session = stripe.checkout.Session.retrieve(
+                session_id,
+                expand=["payment_intent"],
+            )
+        except Exception as exc:
+            messages.error(request, f"Could not verify payment: {exc}")
+            return redirect("orders:order_detail", pk=order.pk)
+
+        if session.payment_status == "paid" or (
+            session.payment_intent and session.payment_intent.status == "succeeded"
+        ):
+            record_payment(
+                order=order,
+                provider="stripe",
+                method=Payment.Method.CARD,
+                status=Payment.Status.SUCCESS,
+                amount=Decimal(order.total_amount),
+                provider_ref=session.payment_intent.id if session.payment_intent else session.id,
+            )
+            messages.success(request, f"Payment successful. Order #{order.pk} is now paid.")
+            request.session["cart"] = {}
+            request.session.modified = True
+        else:
+            record_payment(
+                order=order,
+                provider="stripe",
+                method=Payment.Method.CARD,
+                status=Payment.Status.FAILED,
+                amount=Decimal(order.total_amount),
+                provider_ref=session.id,
+            )
+            messages.error(request, "Payment not completed.")
+        return redirect("orders:order_detail", pk=order.pk)
+
+    # Fallback: mock flow
+    result = request.GET.get("status")
+    ref = request.GET.get("ref") or None
     status = Payment.Status.SUCCESS if result == "success" else Payment.Status.FAILED
 
     payment = record_payment(
         order=order,
         provider="mock",
-        method=Payment.Method.CARD,     
-        status=status,                  
+        method=Payment.Method.CARD,
+        status=status,
         amount=Decimal(order.total_amount),
         provider_ref=ref,
     )
 
     if payment.status == Payment.Status.SUCCESS:
         messages.success(request, f"Payment successful. Order #{order.pk} is now paid.")
-        # clear cart now that a successful payment happened
         request.session["cart"] = {}
         request.session.modified = True
     else:
-        messages.error(request, "Payment failed or was cancelled. Your order is still pending.")
-
+        messages.error(request, "Payment failed or was cancelled.")
     return redirect("orders:order_detail", pk=order.pk)

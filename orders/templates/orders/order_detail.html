@@ -7,7 +7,7 @@
 <div class="container mt-4 pt-2 mt-lg-5 pt-lg-4">
   <h1 class="h4 mb-3">Order #{{ order.pk }}</h1>
 
-  <div class="mb-3 d-flex flex-wrap align-items-center">
+  <div class="mb-3 d-flex flex-wrap align-items-center w-100">
     <span class="badge badge-secondary text-uppercase mr-2">Status: {{ order.status }}</span>
     {% if order.user %}
       <span class="text-muted mr-2">Customer: {{ order.user }}</span>
@@ -15,20 +15,25 @@
     <span class="text-muted mr-2">Placed: {{ order.created_at|date:"Y-m-d H:i" }}</span>
 
     {% if order.status != 'paid' %}
-      <a href="{% url 'orders:pay_mock' order.pk %}" class="btn btn-dark btn-sm ml-auto">Pay (mock)</a>
+      <div class="btn-group ml-auto">
+        <form action="{% url 'orders:pay_stripe' order.pk %}" method="post" class="d-inline">
+          {% csrf_token %}
+          <button class="btn btn-dark btn-sm">Pay with Stripe</button>
+        </form>
+        <a href="{% url 'orders:pay_mock' order.pk %}" class="btn btn-outline-secondary btn-sm">Pay (mock)</a>
+      </div>
     {% endif %}
   </div>
 
   {# Prompt to add details if missing #}
-{% if order.status != 'paid' and not order.buyer_name and not order.ship_address1 %}
-  <div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
-    <span>Shipping/contact details are missing.</span>
-    <a href="{% url 'orders:order_checkout' order.pk %}" class="btn btn-sm btn-primary">
-      Add shipping details
-    </a>
-  </div>
-{% endif %}
-
+  {% if order.status != 'paid' and not order.buyer_name and not order.ship_address1 %}
+    <div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
+      <span>Shipping/contact details are missing.</span>
+      <a href="{% url 'orders:order_checkout' order.pk %}" class="btn btn-sm btn-primary">
+        Add shipping details
+      </a>
+    </div>
+  {% endif %}
 
   {# Buyer + Shipping summary #}
   {% if order.buyer_name or order.buyer_email or order.buyer_phone or order.ship_address1 %}
@@ -116,14 +121,16 @@
 
   <div class="d-flex justify-content-between">
     <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-dark">Continue shopping</a>
-    <div>
-      {% if order.status != 'paid' %}
-        <a href="{% url 'orders:order_checkout' order.pk %}" class="btn btn-outline-secondary mr-2">
-          Edit details
-        </a>
-        <a href="{% url 'orders:pay_mock' order.pk %}" class="btn btn-dark">Pay (mock)</a>
-      {% endif %}
-    </div>
+    {% if order.status != 'paid' %}
+      <div class="btn-group">
+        <a href="{% url 'orders:order_checkout' order.pk %}" class="btn btn-outline-secondary">Edit details</a>
+        <form action="{% url 'orders:pay_stripe' order.pk %}" method="post" class="d-inline">
+          {% csrf_token %}
+          <button class="btn btn-dark">Pay with Stripe</button>
+        </form>
+        <a href="{% url 'orders:pay_mock' order.pk %}" class="btn btn-outline-secondary">Pay (mock)</a>
+      </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

@@ -21,9 +21,18 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
+# -----------------------------------------------------
+# Stripe
+# -----------------------------------------------------
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-not-secure")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")]
+
+
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
+STRIPE_CURRENCY = os.getenv("STRIPE_CURRENCY", "gbp")
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 # -----------------------------------------------------
 # Apps / Middleware
