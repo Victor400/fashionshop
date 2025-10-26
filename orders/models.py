@@ -2,6 +2,9 @@
 from decimal import Decimal, ROUND_HALF_UP
 from django.db import models
 from django.utils import timezone
+from django.conf import settings
+from django.db import models
+
 
 SCHEMA = "fashionshop"
 
@@ -119,3 +122,28 @@ class Payment(models.Model):
 
     def __str__(self) -> str:
         return f"Payment #{self.pk} {self.provider}/{self.method} {self.status} £{self.amount}"
+    
+
+
+class OrderStatusHistory(models.Model):
+    """
+    Records every status change for an order.
+    Managed by Django (creates fashionshop.order_status_history).
+    """
+    order = models.ForeignKey("Order", on_delete=models.CASCADE, related_name="status_history", db_column="order_id")
+    from_status = models.CharField(max_length=20, db_column="from_status")
+    to_status   = models.CharField(max_length=20, db_column="to_status")
+    changed_by  = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True,
+        on_delete=models.SET_NULL, db_column="changed_by_id", related_name="order_status_changes"
+    )
+    created_at  = models.DateTimeField(auto_now_add=True, db_column="created_at")
+
+    class Meta:
+        db_table = '"fashionshop"."order_status_history"'
+        managed = True  # this table will be created by Django
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Order #{self.order_id}: {self.from_status} → {self.to_status}"
+
