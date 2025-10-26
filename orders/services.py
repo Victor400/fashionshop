@@ -15,7 +15,8 @@ from django.utils import timezone
 
 from catalog.models import Product
 from .models import Order, OrderItem, AppUser, Payment
-
+from django.utils import timezone
+from .models import Order, OrderStatusHistory
 
 def ensure_app_user_for_django_user(dj_user) -> Optional[AppUser]:
     """
@@ -129,3 +130,44 @@ def record_payment(
         order.save(update_fields=["status"])
 
     return payment
+
+
+
+# Allowed linear flow + cancellation rule
+ALLOWED_TRANSITIONS = {
+    "pending":   {"paid", "cancelled"},
+    "paid":      {"shipped"},
+    "shipped":   {"delivered"},
+    "delivered": set(),        # terminal
+    "cancelled": set(),        # terminal
+}
+
+# Optional: normalize (lowercase)
+CANON = {"pending", "paid", "shipped", "delivered", "cancelled"}
+
+def allowed_next_statuses(current: str) -> list[str]:
+    cur = (current or "").lower()
+    return sorted(ALLOWED_TRANSITIONS.get(cur, set()))
+
+def set_order_status(order: Order, to_status: str, by_user=None) -> OrderStatusHistory:
+    """
+    Validate and perform a status transition; record a history row with timestamp.
+    Does NOT change stock (per AC).
+    """
+    frm = (order.status or "").lower()
+    to  = (to_status or "").lower()
+    if to not in CANON:
+        raise ValueError(f"Unknown status: {to}")
+    allowed = ALLOWED_TRANSITIONS.get(frm, set())
+    if to not in allowed:
+        raise ValueError(f"Transition {frm} → {to} not allowed")
+
+    # Persist on Order
+    order.status = to
+    order.save(update_fields=["status"])
+
+    # Write history row (timestamp = created_at)
+    hist = OrderStatusHistory.objects.create(
+        order=order, from_status=frm, to_status=to, changed_by=by_user
+    )
+    return hist
