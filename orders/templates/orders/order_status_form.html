@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Update Status | Order #{{ order.pk }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 pt-2 mt-lg-5 pt-lg-4">
+  <h1 class="h5 mb-3">Update status — Order #{{ order.pk }}</h1>
+
+  <form method="post" class="bg-white border rounded p-3">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="id_to_status">New status</label>
+      {{ form.to_status }}
+    </div>
+    <button class="btn btn-dark" {% if not form.fields.to_status.choices %}disabled{% endif %}>Update</button>
+    <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-outline-secondary ml-2">Cancel</a>
+  </form>
+
+  {% if order.status_history.all %}
+    <hr>
+    <h2 class="h6">History</h2>
+    <ul class="small text-muted">
+      {% for h in order.status_history.all %}
+        <li>{{ h.created_at|date:"Y-m-d H:i" }} — {{ h.from_status }} → <strong>{{ h.to_status }}</strong> {% if h.changed_by %}by {{ h.changed_by }}{% endif %}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>
+{% endblock %}

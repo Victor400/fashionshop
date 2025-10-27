@@ -2,6 +2,7 @@
 from django import forms
 from django.forms import ModelForm
 from .models import Order
+from .services import allowed_next_statuses
 
 class CheckoutDetailsForm(ModelForm):
     class Meta:
@@ -37,3 +38,15 @@ class CheckoutDetailsForm(ModelForm):
             "ship_country": "Country",
             "notes": "Notes for courier",
         }
+
+
+
+class OrderStatusForm(forms.Form):
+    to_status = forms.ChoiceField(label="New status")
+
+    def __init__(self, *args, order: Order, **kwargs):
+        super().__init__(*args, **kwargs)
+        choices = [(s, s.title()) for s in allowed_next_statuses(order.status)]
+        self.fields["to_status"].choices = choices
+        if not choices:
+            self.fields["to_status"].widget.attrs["disabled"] = True

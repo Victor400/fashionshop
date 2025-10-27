@@ -1,19 +1,25 @@
+# orders/views.py
 from __future__ import annotations
 
 from decimal import Decimal
 
+import stripe
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods, require_GET, require_POST
 
-import stripe
-from .forms import CheckoutDetailsForm
+from .forms import CheckoutDetailsForm, OrderStatusForm
 from .models import Order, Payment
-from .services import create_order_from_cart, record_payment
+from .services import (
+    create_order_from_cart,
+    record_payment,
+    set_order_status,
+)
 
-# Configure Stripe (safe if key missing in local dev)
+# Configure Stripe (safe if missing in local dev)
 stripe.api_key = getattr(settings, "STRIPE_SECRET_KEY", "") or None
 
 
@@ -27,7 +33,7 @@ def checkout_create(request):
     (Cart is NOT cleared here so the user can still edit it.)
     """
     cart = request.session.get("cart", {}) or {}
-    normalized = []
+    normalized: list[dict[str, int | str]] = []
     for sku, qty in cart.items():
         try:
             n = int(qty)
@@ -68,19 +74,22 @@ def order_detail(request, pk):
 @require_http_methods(["GET", "POST"])
 def order_checkout(request, pk):
     """
-    Collect buyer/contact/shipping details for an existing pending order.
+    Collect buyer/contact/shipping details for an existing order.
+
+    - POST with action=save -> save, go back to order detail
+    - POST with action=pay  -> save, then redirect to Stripe checkout
     """
     order = get_object_or_404(Order, pk=pk)
-
     if request.method == "POST":
         form = CheckoutDetailsForm(request.POST, instance=order)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Details saved. You can now pay.")
+            form.save()  # writes buyer_*/ship_* into fashionshop.order
+            if request.POST.get("action") == "pay":
+                return redirect("orders:pay_stripe", pk=order.pk)
+            messages.success(request, "Details saved.")
             return redirect("orders:order_detail", pk=order.pk)
     else:
         form = CheckoutDetailsForm(instance=order)
-
     return render(request, "orders/order_checkout.html", {"order": order, "form": form})
 
 
@@ -96,7 +105,7 @@ def pay_mock(request, pk):
 # -----------------------------
 # Stripe: create Checkout Session
 # -----------------------------
-@require_POST
+@require_http_methods(["GET", "POST"])
 def pay_stripe(request, pk):
     """
     Creates a Stripe Checkout Session for the order and redirects to Stripe.
@@ -112,20 +121,22 @@ def pay_stripe(request, pk):
         messages.error(request, "Stripe is not configured.")
         return redirect("orders:order_detail", pk=order.pk)
 
-    # Build line items from order items (amounts in pence)
-    line_items = []
+    # Build line items (amounts in the smallest currency unit – pence)
+    line_items: list[dict] = []
     currency = getattr(settings, "STRIPE_CURRENCY", "gbp")
     for it in order.items.all():
         name = it.product.name if it.product else f"SKU {it.product_id}"
-        unit_amount = int(Decimal(it.price_each) * 100)  # to pence
-        line_items.append({
-            "price_data": {
-                "currency": currency,
-                "product_data": {"name": name},
-                "unit_amount": unit_amount,
-            },
-            "quantity": it.quantity,
-        })
+        unit_amount = int(Decimal(it.price_each) * 100)
+        line_items.append(
+            {
+                "price_data": {
+                    "currency": currency,
+                    "product_data": {"name": name},
+                    "unit_amount": unit_amount,
+                },
+                "quantity": it.quantity,
+            }
+        )
 
     success_url = (
         request.build_absolute_uri(reverse("orders:payment_return"))
@@ -175,7 +186,6 @@ def payment_return(request):
     provider = (request.GET.get("provider") or "").lower()
 
     if provider == "stripe":
-        # Verify the Stripe session
         session_id = request.GET.get("session_id")
         if not session_id:
             messages.error(request, "Missing payment session.")
@@ -237,3 +247,30 @@ def payment_return(request):
     else:
         messages.error(request, "Payment failed or was cancelled.")
     return redirect("orders:order_detail", pk=order.pk)
+
+
+# -----------------------------
+# Staff: update order status
+# -----------------------------
+def _staff(user):  # simple helper for the decorator
+    return user.is_authenticated and user.is_staff
+
+
+@user_passes_test(_staff, login_url="account_login")
+def order_status_update(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    form = OrderStatusForm(request.POST or None, order=order)
+
+    if request.method == "POST":
+        if form.is_valid():
+            try:
+                set_order_status(order, form.cleaned_data["to_status"], by_user=request.user)
+                messages.success(
+                    request,
+                    f"Order #{order.pk} status updated to “{form.cleaned_data['to_status']}”.",
+                )
+                return redirect("orders:order_detail", pk=order.pk)
+            except ValueError as e:
+                messages.error(request, str(e))
+
+    return render(request, "orders/order_status_form.html", {"order": order, "form": form})

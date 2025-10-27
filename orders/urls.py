@@ -11,4 +11,5 @@ urlpatterns = [
     path("<int:pk>/pay/stripe/", views.pay_stripe, name="pay_stripe"),
     path("return/", views.payment_return, name="payment_return"),
     path("<int:pk>/", views.order_detail, name="order_detail"),
+    path("<int:pk>/status/", views.order_status_update, name="order_status_update"),
 ]
