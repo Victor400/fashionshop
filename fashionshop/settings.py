@@ -22,17 +22,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 # -----------------------------------------------------
-# Stripe
+# Core / Stripe
 # -----------------------------------------------------
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-not-secure")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")]
 
-
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+# Stripe keys and config
+STRIPE_SECRET_KEY      = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
-STRIPE_CURRENCY = os.getenv("STRIPE_CURRENCY", "gbp")
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+STRIPE_WEBHOOK_SECRET  = os.getenv("STRIPE_WEBHOOK_SECRET", "")  
+STRIPE_CURRENCY        = os.getenv("STRIPE_CURRENCY", "gbp")
 
 # -----------------------------------------------------
 # Apps / Middleware
@@ -50,9 +50,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'catalog',
     'home',
-    'orders'
+    'orders',
 ]
-
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -61,11 +60,10 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "allauth.account.middleware.AccountMiddleware", 
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
 
 # -----------------------------------------------------
 # URLs / WSGI / Templates
@@ -93,7 +91,6 @@ TEMPLATES = [
     },
 ]
 
-
 # ---------- Auth / Allauth ----------
 AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",           # Django admin
@@ -112,8 +109,6 @@ ACCOUNT_SIGNUP_EMAIL_ENTER_TWICE = True
 ACCOUNT_USERNAME_MIN_LENGTH = 4
 LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "/"
-
-
 
 # -----------------------------------------------------
 # Database (PostgreSQL via dj-database-url, with SQLite fallback)
@@ -142,15 +137,14 @@ if "postgresql" in ENGINE:
 # Static files (WhiteNoise)
 # -----------------------------------------------------
 STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]      
-STATIC_ROOT = BASE_DIR / "staticfiles"            
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 TEMPLATES[0]["OPTIONS"]["context_processors"] += [
     "django.template.context_processors.media",
 ]
-
 
 STORAGES = {
     "staticfiles": {
