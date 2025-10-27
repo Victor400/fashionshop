@@ -145,7 +145,7 @@ if "postgresql" in ENGINE:
     # Keep your schema preference; harmless if schema doesn't exist yet
     DATABASES["default"]["OPTIONS"].setdefault(
         "options",
-        "-c search_path=fashionshop,public",
+        #"-c search_path=fashionshop,public",
     )
 
 # -----------------------------------------------------
