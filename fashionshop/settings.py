@@ -128,42 +128,40 @@ ACCOUNT_SIGNUP_FIELDS = [
 ACCOUNT_USERNAME_MIN_LENGTH = 4
 LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "/"
-
 # -----------------------------------------------------
 # Database (Postgres via DATABASE_URL; local SQLite fallback)
 # -----------------------------------------------------
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 PG_SCHEMA = os.getenv("POSTGRES_SCHEMA", "fashionshop")
 
-# NEW: control SSL requirement via env (default False when DEBUG=True)
-DB_SSL_REQUIRE = os.getenv(
-    "DB_SSL_REQUIRE",
-    "false" if DEBUG else "true"
-).lower() in {"1", "true", "yes"}
+# Control SSL via env: default OFF in DEBUG, ON otherwise
+DB_SSL_REQUIRE = os.getenv("DB_SSL_REQUIRE", "false" if DEBUG else "true").lower() in {"1","true","yes"}
 
 if DATABASE_URL:
+    # Parse DATABASE_URL (Heroku/Neon/Render style)
     DATABASES = {
         "default": dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=600,
-            ssl_require=DB_SSL_REQUIRE,  # <— uses env/DEBUG
+            ssl_require=DB_SSL_REQUIRE,
         )
     }
 
-if DATABASE_URL and "postgresql" in DATABASES["default"]["ENGINE"]:
-    DATABASES["default"].setdefault("OPTIONS", {})
-    DATABASES["default"]["OPTIONS"].setdefault(
-        "options", f"-c search_path={PG_SCHEMA},public"
-    )
+    # If this is Postgres, set search_path so your app tables go into PG_SCHEMA first
+    engine = DATABASES["default"]["ENGINE"]
+    if engine.startswith("django.db.backends.postgresql"):
+        DATABASES["default"].setdefault("OPTIONS", {})
+        # Put your schema first; fall back to public
+        DATABASES["default"]["OPTIONS"]["options"] = f"-c search_path={PG_SCHEMA},public"
 
 else:
+    # Local dev fallback
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
-
 
 # -----------------------------------------------------
 # Static / Media (WhiteNoise)
