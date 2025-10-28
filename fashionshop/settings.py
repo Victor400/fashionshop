@@ -116,10 +116,15 @@ EMAIL_BACKEND = os.getenv(
 )
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@localhost")
 
-ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "mandatory")
-ACCOUNT_SIGNUP_EMAIL_ENTER_TWICE = True
+ACCOUNT_LOGIN_METHODS = {"email", "username"}
+ACCOUNT_SIGNUP_FIELDS = [
+    "email*", "email2*",
+    "username*",
+    "password1*", "password2*",
+]
+
 ACCOUNT_USERNAME_MIN_LENGTH = 4
 LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "/"
@@ -128,33 +133,35 @@ LOGIN_REDIRECT_URL = "/"
 # Database (Postgres via DATABASE_URL; local SQLite fallback)
 # -----------------------------------------------------
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
-PG_SCHEMA = os.getenv("POSTGRES_SCHEMA", "fashionshop")  # which schema to prefer in Postgres
+PG_SCHEMA = os.getenv("POSTGRES_SCHEMA", "fashionshop")
+
+# NEW: control SSL requirement via env (default False when DEBUG=True)
+DB_SSL_REQUIRE = os.getenv(
+    "DB_SSL_REQUIRE",
+    "false" if DEBUG else "true"
+).lower() in {"1", "true", "yes"}
 
 if DATABASE_URL:
-    # Production / any env with DATABASE_URL (Neon/Heroku/etc.)
     DATABASES = {
         "default": dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=600,
-            ssl_require=True,  # SSL for hosted Postgres
+            ssl_require=DB_SSL_REQUIRE,  # <— uses env/DEBUG
         )
     }
-
-    # Ensure search_path includes our app schema first, then public
     if "postgresql" in DATABASES["default"]["ENGINE"]:
         DATABASES["default"].setdefault("OPTIONS", {})
         DATABASES["default"]["OPTIONS"].setdefault(
-            "options",
-            f"-c search_path={PG_SCHEMA},public",
+            "options", f"-c search_path={PG_SCHEMA},public"
         )
 else:
-    # Local dev: simple SQLite
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+
 
 # -----------------------------------------------------
 # Static / Media (WhiteNoise)
