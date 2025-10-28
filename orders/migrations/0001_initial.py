@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': '"fashionshop"."app_user"',
-                'managed': False,
+                'managed': True,
             },
         ),
         migrations.CreateModel(
@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': '"fashionshop"."order_item"',
-                'managed': False,
+                'managed': True,
             },
         ),
         migrations.CreateModel(
@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': '"fashionshop"."payment"',
-                'managed': False,
+                'managed': True,
             },
         ),
         migrations.CreateModel(
