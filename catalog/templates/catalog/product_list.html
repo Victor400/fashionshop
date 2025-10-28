@@ -12,8 +12,7 @@
         <div class="product-card-media">
           <img
             alt="{{ p.name }}"
-            src="{% static 'catalog/img/products/' %}{{ p.sku|lower }}.jpg"
-            onerror="this.onerror=null;this.src='{% static 'img/placeholder.png' %}';">
+            src="{% static 'catalog/img/products/' %}{{ p.sku|lower }}.jpg">
         </div>
         <div class="card-body d-flex flex-column">
           <h2 class="h6 product-title text-truncate mb-1" title="{{ p.name }}">{{ p.name }}</h2>
