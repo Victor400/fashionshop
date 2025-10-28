@@ -149,11 +149,13 @@ if DATABASE_URL:
             ssl_require=DB_SSL_REQUIRE,  # <— uses env/DEBUG
         )
     }
-    if "postgresql" in DATABASES["default"]["ENGINE"]:
-        DATABASES["default"].setdefault("OPTIONS", {})
-        DATABASES["default"]["OPTIONS"].setdefault(
-            "options", f"-c search_path={PG_SCHEMA},public"
-        )
+
+if DATABASE_URL and "postgresql" in DATABASES["default"]["ENGINE"]:
+    DATABASES["default"].setdefault("OPTIONS", {})
+    DATABASES["default"]["OPTIONS"].setdefault(
+        "options", f"-c search_path={PG_SCHEMA},public"
+    )
+
 else:
     DATABASES = {
         "default": {
