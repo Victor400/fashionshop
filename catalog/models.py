@@ -8,7 +8,7 @@ class Category(models.Model):
 
     class Meta:
         db_table = "category"
-        managed = False
+        managed = True
         ordering = ["display_name", "name"]
 
     def __str__(self):
@@ -21,7 +21,7 @@ class Brand(models.Model):
 
     class Meta:
         db_table = "brand"
-        managed = False
+        managed = True
         ordering = ["name"]
 
     def __str__(self):
@@ -50,7 +50,7 @@ class Product(models.Model):
 
     class Meta:
         db_table = "product"
-        managed = False
+        managed = True
 
     def __str__(self):
         return f"{self.name} ({self.sku})"
