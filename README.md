@@ -273,7 +273,7 @@ stripe listen --forward-to http://127.0.0.1:8000/orders/stripe/webhook/
 
 ## Testing 
 
-Manual checklist:
+### Manual checklist:
 
 - Cart → order: add items to bag, create order
 
@@ -287,7 +287,7 @@ Manual checklist:
 
 - Staff status: update status, confirm transitions & history
 
-E2E Smoke Test (Checkout Flow)
+### E2E Smoke Test (Checkout Flow)
 
 We include an end-to-end smoke test to exercise the full path in-process:
 
@@ -342,7 +342,7 @@ python manage.py collectstatic --noinput
 
 - Set Stripe keys and, optionally, the webhook secret.
 
-Heroku Notes & Unmanaged Schema
+### Heroku Notes & Unmanaged Schema
 
 Config vars
 ```bash
@@ -353,7 +353,7 @@ heroku config:set -a <app> \
   ALLOWED_HOSTS=<your-app>.herokuapp.com \
   CSRF_TRUSTED_ORIGINS=https://<your-app>.herokuapp.com
 ```
-Migration & Fixtures
+### Migration & Fixtures
 ```bash
 heroku run -a <app> -- python manage.py migrate
 heroku run -a <app> -- python manage.py loaddata fixtures/brands.json fixtures/categories.json fixtures/products.json
