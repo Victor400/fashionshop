@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Home | FashionShop{% endblock %}
 {% block page_header %}{% endblock %}
@@ -9,7 +10,7 @@
   <div class="row align-items-center">
     <div class="col-md-7 mb-3 mb-md-0">
       <div class="panel">
-        <img src="{{ MEDIA_URL }}spotlight.jpg" alt="New collections">
+        <img src="{% static 'home/img/spotlight.jpg' %}" alt="New collections">
       </div>
     </div>
     <div class="col-md-5">
@@ -17,8 +18,6 @@
         <h1 class="h3 mb-2">Welcome to FashionShop</h1>
         <p class="text-muted mb-4">The new collections are here.</p>
         <a href="{% url 'catalog:product_list' %}" class="btn btn-dark btn-lg">Shop now</a>
-
-
       </div>
     </div>
   </div>
@@ -28,7 +27,7 @@
   <div class="row align-items-center flex-md-row-reverse">
     <div class="col-md-7 mb-3 mb-md-0">
       <div class="panel">
-        <img src="{{ MEDIA_URL }}hero.jpg" alt="Season spotlight">
+        <img src="{% static 'home/img/hero.jpg' %}" alt="Season spotlight">
       </div>
     </div>
     <div class="col-md-5">
@@ -40,5 +39,4 @@
     </div>
   </div>
 </section>
-
 {% endblock %}
