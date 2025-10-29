@@ -2,14 +2,14 @@
 from __future__ import annotations
 
 from decimal import Decimal
-
 import stripe
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.views.decorators.http import require_http_methods, require_GET, require_POST
+from django.views.decorators.http import require_http_methods, require_GET
 
 from .forms import CheckoutDetailsForm, OrderStatusForm
 from .models import Order, Payment
@@ -19,7 +19,7 @@ from .services import (
     set_order_status,
 )
 
-# Configure Stripe (safe if missing in local dev)
+# Stripe can be empty in local dev
 stripe.api_key = getattr(settings, "STRIPE_SECRET_KEY", "") or None
 
 
@@ -33,7 +33,7 @@ def checkout_create(request):
     (Cart is NOT cleared here so the user can still edit it.)
     """
     cart = request.session.get("cart", {}) or {}
-    normalized: list[dict[str, int | str]] = []
+    normalized = []
     for sku, qty in cart.items():
         try:
             n = int(qty)
@@ -252,7 +252,7 @@ def payment_return(request):
 # -----------------------------
 # Staff: update order status
 # -----------------------------
-def _staff(user):  # simple helper for the decorator
+def _staff(user):
     return user.is_authenticated and user.is_staff
 
 

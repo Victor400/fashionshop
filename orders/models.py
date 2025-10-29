@@ -1,46 +1,62 @@
 # orders/models.py
+from __future__ import annotations
+
 from decimal import Decimal, ROUND_HALF_UP
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
+SCHEMA = "fashionshop"
+
 
 class AppUser(models.Model):
     """
-    Simple user shadow table (only if you really need it);
-    otherwise you can drop this and use settings.AUTH_USER_MODEL directly.
+    Unmanaged mapping to fashionshop.app_user
     """
-    email = models.TextField()
-    full_name = models.CharField(max_length=120, blank=True, null=True)
-    created_at = models.DateTimeField()
+    id = models.BigAutoField(primary_key=True, db_column="id")
+    email = models.TextField(db_column="email")
+    full_name = models.CharField(max_length=120, db_column="full_name", blank=True, null=True)
+    created_at = models.DateTimeField(db_column="created_at")
+
+    class Meta:
+        db_table = f'"{SCHEMA}"."app_user"'
+        managed = False
 
     def __str__(self) -> str:
         return self.email or f"app_user:{self.pk}"
 
 
 class Order(models.Model):
+    """
+    Unmanaged mapping to fashionshop.order
+    NOTE: DB has NOT NULL for user_id → we do NOT allow nulls here.
+    """
     user = models.ForeignKey(
-        AppUser, null=True, blank=True,
-        on_delete=models.SET_NULL,
+        AppUser,
+        on_delete=models.PROTECT,              # do not orphan historical orders
+        db_column="user_id",
         related_name="orders",
     )
-    status = models.CharField(max_length=20, default="pending")
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    created_at = models.DateTimeField(default=timezone.now, editable=False)
+    status = models.CharField(max_length=20, db_column="status", default="pending")
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, db_column="total_amount")
+    created_at = models.DateTimeField(db_column="created_at", default=timezone.now, editable=False)
 
-    # ── Buyer & shipping fields ─────────────────────────
-    buyer_name = models.TextField(blank=True, null=True)
-    buyer_email = models.TextField(blank=True, null=True)
-    buyer_phone = models.TextField(blank=True, null=True)
+    # Buyer & shipping (nullable in DB)
+    buyer_name = models.TextField(db_column="buyer_name", blank=True, null=True)
+    buyer_email = models.TextField(db_column="buyer_email", blank=True, null=True)
+    buyer_phone = models.TextField(db_column="buyer_phone", blank=True, null=True)
 
-    ship_address1 = models.TextField(blank=True, null=True)
-    ship_address2 = models.TextField(blank=True, null=True)
-    ship_city = models.TextField(blank=True, null=True)
-    ship_postcode = models.TextField(blank=True, null=True)
-    ship_country = models.TextField(blank=True, null=True)
+    ship_address1 = models.TextField(db_column="ship_address1", blank=True, null=True)
+    ship_address2 = models.TextField(db_column="ship_address2", blank=True, null=True)
+    ship_city = models.TextField(db_column="ship_city", blank=True, null=True)
+    ship_postcode = models.TextField(db_column="ship_postcode", blank=True, null=True)
+    ship_country = models.TextField(db_column="ship_country", blank=True, null=True)
 
-    notes = models.TextField(blank=True, null=True)
-    # ───────────────────────────────────────────────────
+    notes = models.TextField(db_column="notes", blank=True, null=True)
+
+    class Meta:
+        db_table = f'"{SCHEMA}"."order"'
+        managed = False
 
     def __str__(self) -> str:
         return f"Order #{self.pk} ({self.status})"
@@ -48,14 +64,27 @@ class Order(models.Model):
     @staticmethod
     def q2(x: Decimal) -> Decimal:
         """Quantize to 2dp (HALF_UP)."""
-        return x.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        return Decimal(x).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
-    product = models.ForeignKey("catalog.Product", on_delete=models.PROTECT)
-    quantity = models.PositiveIntegerField()
-    price_each = models.DecimalField(max_digits=10, decimal_places=2)
+    """
+    Unmanaged mapping to fashionshop.order_item
+    """
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE,
+        related_name="items", db_column="order_id"
+    )
+    product = models.ForeignKey(
+        "catalog.Product", on_delete=models.PROTECT,
+        db_column="product_id"
+    )
+    quantity = models.PositiveIntegerField(db_column="quantity")
+    price_each = models.DecimalField(max_digits=10, decimal_places=2, db_column="price_each")
+
+    class Meta:
+        db_table = f'"{SCHEMA}"."order_item"'
+        managed = False
 
     def __str__(self) -> str:
         return f"{self.product_id} x{self.quantity}"
@@ -66,6 +95,12 @@ class OrderItem(models.Model):
 
 
 class Payment(models.Model):
+    """
+    Unmanaged mapping to fashionshop.payment
+    Enums (DB enums) must match:
+      - fashionshop.payment_method:  'card', 'paypal', 'cod'
+      - fashionshop.payment_status:  'pending', 'successful', 'failed'
+    """
     class Method(models.TextChoices):
         CARD = "card", "Card"
         PAYPAL = "paypal", "PayPal"
@@ -76,13 +111,20 @@ class Payment(models.Model):
         SUCCESS = "successful", "Successful"
         FAILED = "failed", "Failed"
 
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="payments")
-    provider = models.CharField(max_length=40)
-    method = models.CharField(max_length=20, choices=Method.choices)
-    status = models.CharField(max_length=20, choices=Status.choices)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    provider_ref = models.CharField(max_length=200, blank=True, null=True)
-    created_at = models.DateTimeField(default=timezone.now, editable=False)
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE,
+        related_name="payments", db_column="order_id"
+    )
+    provider = models.CharField(max_length=40, db_column="provider")
+    method = models.CharField(max_length=20, choices=Method.choices, db_column="method")
+    status = models.CharField(max_length=20, choices=Status.choices, db_column="status")
+    amount = models.DecimalField(max_digits=10, decimal_places=2, db_column="amount")
+    provider_ref = models.CharField(max_length=200, db_column="provider_ref", blank=True, null=True)
+    created_at = models.DateTimeField(db_column="created_at", default=timezone.now, editable=False)
+
+    class Meta:
+        db_table = f'"{SCHEMA}"."payment"'
+        managed = False
 
     def __str__(self) -> str:
         return f"Payment #{self.pk} {self.provider}/{self.method} {self.status} £{self.amount}"
@@ -90,19 +132,20 @@ class Payment(models.Model):
 
 class OrderStatusHistory(models.Model):
     """
-    Records every status change for an order.
-    Django will create this table in the default schema (public).
+    Managed by Django (our own table) – keeps a record of status changes.
     """
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="status_history")
-    from_status = models.CharField(max_length=20)
-    to_status   = models.CharField(max_length=20)
+    order = models.ForeignKey("Order", on_delete=models.CASCADE, related_name="status_history", db_column="order_id")
+    from_status = models.CharField(max_length=20, db_column="from_status")
+    to_status   = models.CharField(max_length=20, db_column="to_status")
     changed_by  = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True,
-        on_delete=models.SET_NULL, related_name="order_status_changes"
+        on_delete=models.SET_NULL, db_column="changed_by_id", related_name="order_status_changes"
     )
-    created_at  = models.DateTimeField(auto_now_add=True)
+    created_at  = models.DateTimeField(auto_now_add=True, db_column="created_at")
 
     class Meta:
+        db_table = f'"{SCHEMA}"."order_status_history"'
+        managed = True
         ordering = ["-created_at"]
 
     def __str__(self):
