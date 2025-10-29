@@ -215,6 +215,11 @@ STRIPE_CURRENCY=gbp
 # Optional: Webhooks (only if you use them)
 STRIPE_WEBHOOK_SECRET=whsec_xxx
 ```
+
+Images 
+- Home page uses spotlight.jpg and hero.jpg — place these under home/img.
+
+- Product list uses static/catalog/img/products/{{ sku|lower }}.jpg — make sure files exist & match SKUs.
 ## Running Payments
 Mock Flow (no Stripe required)
 
@@ -282,6 +287,43 @@ Manual checklist:
 
 - Staff status: update status, confirm transitions & history
 
+E2E Smoke Test (Checkout Flow)
+
+We include an end-to-end smoke test to exercise the full path in-process:
+
+What it does
+
+- Ensures the DB search_path is correct.
+
+- Creates/clears a session, adds a couple of catalog SKUs to the cart.
+
+- Calls checkout_create to build an Order + OrderItems.
+
+- Submits buyer + shipping details to order_checkout.
+
+- Simulates a mock payment return ?status=success to record a Payment and mark order paid.
+
+- Asserts everything is consistent and prints a success line.
+
+Run it 
+```bash
+python manage.py smoketest_e2e
+```
+Requirements
+
+- testserver must be present in ALLOWED_HOSTS (already in the .env example).
+
+- Sample products loaded (e.g. fixtures/products.json).
+
+Expected Output
+```bash
+E2E smoke test starting…
+search_path: fashionshop,public
+… created Order #<id>
+… saved checkout details
+… mock payment success recorded
+E2E OK: order is PAID, payment row exists
+```
 ## Deployment
 
 - Use environment variables for all secrets (never commit keys).
@@ -300,6 +342,52 @@ python manage.py collectstatic --noinput
 
 - Set Stripe keys and, optionally, the webhook secret.
 
+Heroku Notes & Unmanaged Schema
+
+Config vars
+```bash
+heroku config:set -a <app> \
+  DJANGO_SETTINGS_MODULE=fashionshop.settings \
+  DEBUG=False \
+  POSTGRES_SCHEMA=fashionshop \
+  ALLOWED_HOSTS=<your-app>.herokuapp.com \
+  CSRF_TRUSTED_ORIGINS=https://<your-app>.herokuapp.com
+```
+Migration & Fixtures
+```bash
+heroku run -a <app> -- python manage.py migrate
+heroku run -a <app> -- python manage.py loaddata fixtures/brands.json fixtures/categories.json fixtures/products.json
+heroku run -a <app> -- python manage.py collectstatic --noinput
+```
+Verify search_path
+```bash
+heroku run -a <app> -- python -c "import os,django; os.environ.setdefault('DJANGO_SETTINGS_MODULE','fashionshop.settings'); django.setup(); from django.db import connection as c; cur=c.cursor(); cur.execute('SHOW search_path;'); print(cur.fetchone()[0])"
+# should be: fashionshop,public
+
+```
+Create unmanaged tables if needed
+If you get errors like relation "fashionshop.app_user" does not exist, create the missing tables (example for order_status_history):
+```bash
+heroku run -a <app> -- bash -lc "python - <<'PY'
+import os, django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE','fashionshop.settings')
+django.setup()
+from django.db import connection as c
+with c.cursor() as cur:
+    cur.execute(\"
+    CREATE TABLE IF NOT EXISTS fashionshop.\"order_status_history\" (
+        id BIGSERIAL PRIMARY KEY,
+        order_id BIGINT NOT NULL REFERENCES fashionshop.\"order\"(id) ON DELETE CASCADE,
+        from_status   VARCHAR(20) NOT NULL,
+        to_status     VARCHAR(20) NOT NULL,
+        changed_by_id INTEGER NULL REFERENCES public.auth_user(id) ON DELETE SET NULL,
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    \")
+print('created/ensured fashionshop.order_status_history')
+PY"
+```
+Repeat a similar approach if you are missing fashionshop."order", fashionshop.order_item, or fashionshop.payment (quote identifiers as shown).
 ## Acknowledgements
 
 This project was built with the help of many awesome tools, docs, and communities:
