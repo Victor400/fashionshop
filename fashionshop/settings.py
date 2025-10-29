@@ -126,12 +126,6 @@ ACCOUNT_SIGNUP_FIELDS = [
     "password1*", "password2*",
 ]
 
-# How users authenticate at login: "username", "email", or "username_email"
-ACCOUNT_AUTHENTICATION_METHOD = os.getenv("ACCOUNT_AUTHENTICATION_METHOD", "username_email")
-
-# Email verification policy: "mandatory" | "optional" | "none"
-ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "optional")
-
 # Other knobs
 ACCOUNT_USERNAME_MIN_LENGTH = 4
 LOGIN_URL = "account_login"
