@@ -131,39 +131,22 @@
   {% block extra_js %}{% endblock %}
   {% block postloadjs %}{% endblock %}
 
-  <footer class="fs-footer">
-    <div class="container">
+<footer class="fs-footer">
+  <div class="container">
 
-      <div class="fs-brand text-center">
-        <a href="{% url 'home:home' %}" class="fs-logo">Fashion <span>Shop</span></a>
-        <p class="fs-tag">Your curated destination for menswear, womenswear, shoes &amp; bags.</p>
-        <div class="fs-socials" aria-label="Social links">
-          <a href="https://www.instagram.com/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-          <a href="https://x.com/" aria-label="X/Twitter"><i class="fab fa-x-twitter"></i></a>
-          <a href="https://www.facebook.com/" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-          <a href="https://uk.pinterest.com/" aria-label="Pinterest"><i class="fab fa-pinterest-p"></i></a>
-        </div>
-      </div>
-
-      <div class="col-6 col-md-4 col-lg-3">
-        <h6 class="fs-title">Shop</h6>
-        <ul class="fs-list">
-          <li><a href="{% url 'catalog:product_list' %}?cat=menswear">Menswear</a></li>
-          <li><a href="{% url 'catalog:product_list' %}?cat=womenswear">Womenswear</a></li>
-          <li><a href="{% url 'catalog:product_list' %}?cat=shoes">Shoes</a></li>
-          <li><a href="{% url 'catalog:product_list' %}?cat=bags">Bags</a></li>
-        </ul>
-      </div>
-      <div class="col-12 col-md-4 col-lg-3 mt-3 mt-md-0">
-        <h6 class="fs-title">About</h6>
-        <ul class="fs-list">
-          <li><a href="{% url 'home:our_story' %}">Our Story</a></li>
-          <li><a href="{% url 'home:careers' %}">Careers</a></li>
-          <li><a href="{% url 'home:modern_slavery' %}">Modern Slavery Statement</a></li>
-        </ul>
+    <!-- Brand / tagline / socials (centered) -->
+    <div class="fs-brand text-center">
+      <a href="{% url 'home:home' %}" class="fs-logo">Fashion <span>Shop</span></a>
+      <p class="fs-tag">Your curated destination for menswear, womenswear, shoes &amp; bags.</p>
+      <div class="fs-socials" aria-label="Social links">
+        <a href="https://www.instagram.com/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://x.com/" aria-label="X/Twitter"><i class="fab fa-x-twitter"></i></a>
+        <a href="https://www.facebook.com/" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="https://uk.pinterest.com/" aria-label="Pinterest"><i class="fab fa-pinterest-p"></i></a>
       </div>
     </div>
 
+    <!-- ONE row of links (no duplicates). Two-up on mobile, centered. -->
     <div class="row fs-columns justify-content-center">
       <div class="col-6 col-md-4 col-lg-3">
         <h6 class="fs-title">Shop</h6>
@@ -175,7 +158,7 @@
         </ul>
       </div>
 
-      <div class="col-6 col-md-4 col-lg-3 mt-3 mt-md-0">
+      <div class="col-6 col-md-4 col-lg-3">
         <h6 class="fs-title">About</h6>
         <ul class="fs-list">
           <li><a href="{% url 'home:our_story' %}">Our Story</a></li>
@@ -185,16 +168,18 @@
       </div>
     </div>
 
+    <!-- Bottom bar -->
     <div class="fs-bottom d-flex flex-column flex-md-row justify-content-between align-items-center">
       <div>&copy; {{ now|date:"Y" }} FashionShop — All rights reserved.</div>
       <div class="fs-legal">
         <a href="{% url 'home:privacy' %}">Privacy</a> ·
-        <a href="{% url 'home:terms' %}">Terms</a> ·
+        <a href="{% url 'home:terms' %}">Terms</a>
       </div>
     </div>
 
-    </div>
-  </footer>
+  </div>
+</footer>
+
 
 </body>
 
