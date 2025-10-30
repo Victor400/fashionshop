@@ -11,8 +11,11 @@ class OurStoryView(TemplateView):
 class CareersView(TemplateView):
     template_name = "home/careers.html"
 
-class PressView(TemplateView):
-    template_name = "home/press.html"
-
 class ModernSlaveryView(TemplateView):
     template_name = "home/modern_slavery.html"
+
+def privacy(request):
+    return render(request, "home/privacy.html", {"page_title": "Privacy Policy"})
+
+def terms(request):
+    return render(request, "home/terms.html", {"page_title": "Terms of Service"})

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Terms of Service | FashionShop{% endblock %}
+{% block content %}
+<div class="container mt-4 pt-2 mt-lg-5 pt-lg-4">
+  <h1 class="h4 mb-3">Terms of Service</h1>
+  <p class="text-muted small">Last updated: {{ now|date:"Y-m-d" }}</p>
+
+  <div class="bg-white border rounded p-3 p-md-4 shadow-sm">
+    <h2 class="h6 text-uppercase text-muted">1. Agreement</h2>
+    <p>By using this website you agree to these Terms. If you don’t agree, please don’t use the site.</p>
+
+    <h2 class="h6 text-uppercase text-muted mt-4">2. Orders & pricing</h2>
+    <ul>
+      <li>All orders are subject to availability and confirmation of price.</li>
+      <li>Prices may change; the price at checkout is the current price.</li>
+    </ul>
+
+    <h2 class="h6 text-uppercase text-muted mt-4">3. Shipping & returns</h2>
+    <p>Delivery times are estimates. See our Shipping & Returns page for details on returns, refunds, and exchanges.</p>
+
+    <h2 class="h6 text-uppercase text-muted mt-4">4. Acceptable use</h2>
+    <p>You agree not to misuse the site, attempt to disrupt service, or infringe intellectual property.</p>
+
+    <h2 class="h6 text-uppercase text-muted mt-4">5. Liability</h2>
+    <p>To the fullest extent permitted by law, we exclude liability for indirect or consequential loss.</p>
+
+    <h2 class="h6 text-uppercase text-muted mt-4">6. Changes</h2>
+    <p>We may update these Terms. Continued use of the site means you accept the changes.</p>
+
+    <h2 class="h6 text-uppercase text-muted mt-4">7. Contact</h2>
+    <p>Email: support@fashionshop.example</p>
+  </div>
+</div>
+{% endblock %}

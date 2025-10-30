@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy | FashionShop{% endblock %}
+{% block content %}
+<div class="container mt-4 pt-2 mt-lg-5 pt-lg-4">
+  <h1 class="h4 mb-3">Privacy Policy</h1>
+  <p class="text-muted small">Last updated: {{ now|date:"Y-m-d" }}</p>
+
+  <div class="bg-white border rounded p-3 p-md-4 shadow-sm">
+    <h2 class="h6 text-uppercase text-muted">1. Overview</h2>
+    <p>We respect your privacy. This policy explains what data we collect, how we use it, and your choices.</p>
+
+    <h2 class="h6 text-uppercase text-muted mt-4">2. Data we collect</h2>
+    <ul>
+      <li>Account and contact details (name, email, phone).</li>
+      <li>Order and delivery information.</li>
+      <li>Usage data (cookies/analytics) to improve the site.</li>
+    </ul>
+
+    <h2 class="h6 text-uppercase text-muted mt-4">3. How we use data</h2>
+    <ul>
+      <li>To process orders and provide customer support.</li>
+      <li>To improve products, content, and site reliability.</li>
+      <li>With your consent, to send news and offers (you can unsubscribe anytime).</li>
+    </ul>
+
+    <h2 class="h6 text-uppercase text-muted mt-4">4. Sharing</h2>
+    <p>We share data with trusted providers (e.g., payment and delivery services) strictly to fulfil orders and comply with law. We don’t sell your data.</p>
+
+    <h2 class="h6 text-uppercase text-muted mt-4">5. Your rights</h2>
+    <ul>
+      <li>Access, correct, or delete your personal data.</li>
+      <li>Object to or restrict certain processing.</li>
+      <li>Withdraw consent where processing is consent-based.</li>
+    </ul>
+
+    <h2 class="h6 text-uppercase text-muted mt-4">6. Contact</h2>
+    <p>Email: support@fashionshop.example</p>
+  </div>
+</div>
+{% endblock %}
