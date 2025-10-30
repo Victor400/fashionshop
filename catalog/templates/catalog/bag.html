@@ -8,71 +8,77 @@
   <h1 class="h4 mb-3">Your Bag</h1>
 
   {% if is_empty %}
-  <div class="alert alert-light border">Your bag is empty.</div>
-  <a href="{% url 'catalog:product_list' %}" class="btn btn-dark">Browse products</a>
+    <div class="alert alert-light border">Your bag is empty.</div>
+    <a href="{% url 'catalog:product_list' %}" class="btn btn-dark">Browse products</a>
   {% else %}
-  <div class="table-responsive mb-3">
-    <table class="table align-middle">
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th class="text-right" style="width:120px;">Qty</th>
-          <th class="text-right" style="width:140px;">Unit</th>
-          <th class="text-right" style="width:160px;">Line total</th>
-          <th style="width:120px;"></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for r in rows %}
-        <tr>
-          <td>
-            <div class="d-flex align-items-center">
-              <img src="{% static 'catalog/img/products/' %}{{ r.product.sku|lower }}.jpg" alt="{{ r.product.name }}"
-                style="width:48px;height:48px;object-fit:contain" class="mr-2">
-              <div>
-                <div class="font-weight-bold">{{ r.product.name }}</div>
-                <div class="small text-muted">{{ r.product.sku }}</div>
-              </div>
-            </div>
-          </td>
-          <td class="text-right bag-qty">
-            <form method="post" action="{% url 'catalog:update_bag_qty' r.sku %}" class="d-inline">
-              {% csrf_token %}
-              <div class="input-group input-group-sm d-inline-flex justify-content-end bag-qty-group">
-                <input type="number" name="qty" value="{{ r.qty }}" min="0" step="1"
-                  class="form-control text-center bag-qty-input" aria-label="Quantity">
-                <div class="input-group-append">
-                  <button class="btn btn-outline-dark" type="submit">Update</button>
+    <div class="table-responsive mb-3">
+      <table class="table table-striped fs-compact">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th class="text-right" style="width:120px;">Qty</th>
+            <th class="text-right" style="width:140px;">Unit</th>
+            <th class="text-right" style="width:160px;">Line total</th>
+            <th style="width:120px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center">
+                <img
+                  src="{% static 'catalog/img/products/' %}{{ r.product.sku|lower }}.jpg"
+                  alt="{{ r.product.name }}"
+                  style="width:48px;height:48px;object-fit:contain"
+                  class="mr-2">
+                <div>
+                  <div class="font-weight-bold">{{ r.product.name }}</div>
+                  <div class="small text-muted">{{ r.product.sku }}</div>
                 </div>
               </div>
-            </form>
-          </td>
+            </td>
 
-          <td class="text-right">£{{ r.unit|floatformat:2 }}</td>
-          <td class="text-right">£{{ r.line|floatformat:2 }}</td>
-          <td class="text-right">
-            <form method="post" action="{% url 'catalog:remove_from_bag' r.sku %}">
-              {% csrf_token %}
-              <button class="btn btn-sm btn-outline-danger">Remove</button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-      <tfoot>
-        <tr>
-          <th colspan="3" class="text-right">Subtotal</th>
-          <th class="text-right">£{{ subtotal|floatformat:2 }}</th>
-          <th></th>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
+            <td class="text-right bag-qty">
+              <form method="post" action="{% url 'catalog:update_bag_qty' r.sku %}" class="d-inline">
+                {% csrf_token %}
+                <div class="input-group input-group-sm d-inline-flex justify-content-end bag-qty-group">
+                  <input type="number" name="qty" value="{{ r.qty }}" min="0" step="1"
+                         class="form-control text-center bag-qty-input" aria-label="Quantity">
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-dark" type="submit">Update</button>
+                  </div>
+                </div>
+              </form>
+            </td>
 
-  <div class="d-flex justify-content-between">
-    <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-dark">Continue shopping</a>
-    <a href="{% url 'orders:checkout_create' %}" class="btn btn-dark">Checkout</a>
-  </div>
+            <td class="text-right">£{{ r.unit|floatformat:2 }}</td>
+            <td class="text-right">£{{ r.line|floatformat:2 }}</td>
+
+            <td class="text-right">
+              <form method="post" action="{% url 'catalog:remove_from_bag' r.sku %}">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger">Remove</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+
+        <tfoot>
+          <tr>
+            <th colspan="3" class="text-right">Subtotal</th>
+            <th class="text-right">£{{ subtotal|floatformat:2 }}</th>
+            <th></th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="d-flex justify-content-between">
+      <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-dark">Continue shopping</a>
+      <a href="{% url 'orders:checkout_create' %}" class="btn btn-dark">Checkout</a>
+    </div>
   {% endif %}
 </div>
 {% endblock %}

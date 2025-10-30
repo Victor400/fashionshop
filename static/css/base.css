@@ -1,4 +1,32 @@
+/* ===========================================================
+   FashionShop — base.css (consolidated)
+   =========================================================== */
+
+/* -------- Crisp compact tables -------- */
+.table.fs-compact {
+    border-color: rgba(0, 0, 0, .08);
+    background: #fff;
+}
+
+.table.fs-compact thead th {
+    border-bottom: 2px solid rgba(0, 0, 0, .08);
+    font-weight: 700;
+}
+
+.table.fs-compact th,
+.table.fs-compact td {
+    padding: .55rem .75rem;
+    border-top: 1px solid rgba(0, 0, 0, .06);
+    vertical-align: middle;
+}
+
+.table-striped.fs-compact tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, .015);
+}
+
+/* -------- Design tokens & layout variables -------- */
 :root {
+    /* design tokens */
     --bg: #FAFAFA;
     --surface: #FFFFFF;
     --text: #111;
@@ -7,11 +35,17 @@
     --shadow-hover: 0 14px 32px rgba(0, 0, 0, .10);
     --hairline: 1px solid rgba(0, 0, 0, .06);
     --radius: .75rem;
+
+    /* layout (single source of truth) */
+    --fs-topbar-h: 64px;
+    /* #topnav height on desktop */
+    --fs-mainnav-h: 56px;
+    /* includes/main-nav height on desktop */
 }
 
-/* Improve visibility of Bootstrap's default hamburger on white bg */
-.navbar-light .navbar-toggler-icon{
-  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(0,0,0,0.7)' stroke-width='2' stroke-linecap='round' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+/* Improve visibility of Bootstrap hamburger on white bg */
+.navbar-light .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(0,0,0,0.7)' stroke-width='2' stroke-linecap='round' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
 }
 
 /* =========================
@@ -23,11 +57,6 @@ body {
     background: var(--bg);
     color: var(--text);
     font-family: 'Lato', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-}
-
-/* space for fixed header (desktop default) */
-main {
-    padding-top: 8rem;
 }
 
 .icon {
@@ -58,6 +87,17 @@ main {
     border: 1px solid #000 !important;
 }
 
+/* Dropdown polish */
+.navbar .dropdown-menu {
+    border-radius: .5rem;
+    padding: .35rem 0;
+    font-size: .95rem;
+}
+
+.navbar .dropdown-item {
+    padding: .5rem 1rem;
+}
+
 /* Buttons */
 .shop-now-button,
 .btn-black {
@@ -74,7 +114,6 @@ main {
     background: #222;
     color: #fff;
 }
-
 
 /* =========================
    SECTIONS (home hero panels etc.)
@@ -101,7 +140,7 @@ main {
     max-width: 52ch;
 }
 
-/* Glass panel */
+/* Glass card */
 .glass {
     background: var(--surface);
     border: var(--hairline);
@@ -126,13 +165,12 @@ main {
     box-shadow: var(--shadow-hover);
 }
 
-/* Image stage (LIST GRID) — bigger, centered, no cropping */
+/* Stage keeps 60x80 product images un-cropped */
 .product-card-media {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 180px;
-    /* phones */
     background: #fff;
     overflow: hidden;
     border-top-left-radius: .25rem;
@@ -145,7 +183,6 @@ main {
     width: auto;
     height: auto;
     object-fit: contain;
-    /* preserves 60×80, no crop/stretch */
     display: block;
     transition: transform .25s ease;
 }
@@ -154,19 +191,14 @@ main {
     transform: scale(1.04);
 }
 
-
 /* bump media height on larger screens */
 @media (min-width:768px) {
-
-    /* md */
     .product-card-media {
         height: 200px;
     }
 }
 
 @media (min-width:1200px) {
-
-    /* xl */
     .product-card-media {
         height: 240px;
     }
@@ -174,7 +206,6 @@ main {
     .container {
         max-width: 95%;
     }
-
 }
 
 /* Card body */
@@ -209,7 +240,6 @@ main {
     align-items: center;
     justify-content: center;
     min-height: 320px;
-    /* phones/tablets */
     background: #fff;
     overflow: hidden;
     border-radius: .25rem;
@@ -224,57 +254,105 @@ main {
     display: block;
 }
 
-
-.form-control.form-control-sm { padding-top: .25rem; padding-bottom: .25rem; }
-
-/* Align table cells nicely */
-.table td, .table th { vertical-align: middle; }
-
-/* Base width for the qty control */
-.bag-qty .bag-qty-group { width: 170px; }
-.bag-qty-input { text-align: center; }
-
-/* Tighten a bit on narrow phones */
-@media (max-width: 400px) {
-  .bag-qty .bag-qty-group { width: 150px; }
-}
-
-/* Tablets (576–991px): give a little more room */
-@media (min-width: 576px) and (max-width: 991.98px) {
-  .bag-qty .bag-qty-group { width: 180px; }
-}
-
-/* Desktops (≥992px): comfy width */
-@media (min-width: 992px) {
-  .bag-qty .bag-qty-group { width: 190px; }
-}
-
-
 @media (min-width:992px) {
-
-    /* lg desktop stage */
     .product-detail-media {
         min-height: 420px;
     }
 }
 
+/* Forms & tables */
+.form-control.form-control-sm {
+    padding-top: .25rem;
+    padding-bottom: .25rem;
+}
+
+.table td,
+.table th {
+    vertical-align: middle;
+}
+
+/* Bag qty input widths */
+.bag-qty .bag-qty-group {
+    width: 170px;
+}
+
+.bag-qty-input {
+    text-align: center;
+}
+
+@media (max-width:400px) {
+    .bag-qty .bag-qty-group {
+        width: 150px;
+    }
+}
+
+@media (min-width:576px) and (max-width:991.98px) {
+    .bag-qty .bag-qty-group {
+        width: 180px;
+    }
+}
+
+@media (min-width:992px) {
+    .bag-qty .bag-qty-group {
+        width: 190px;
+    }
+}
+
 /* =========================
-   RESPONSIVE: HEADER + LAYOUT
+   LAYOUT NORMALIZATION (final authority)
    ========================= */
+
+/* Desktop: make the top bar sticky */
+@media (min-width:992px) {
+    .fixed-top-desktop-only {
+        position: sticky !important;
+        top: 0;
+        z-index: 1030;
+        background: #fff;
+    }
+}
+
+/* Content offset = header + main-nav (desktop), single value for mobile */
+@media (min-width:992px) {
+    .site-offset {
+        padding-top: calc(var(--fs-topbar-h) + var(--fs-mainnav-h) + 12px) !important;
+    }
+}
+
+@media (max-width:991.98px) {
+    .site-offset {
+        padding-top: 96px !important;
+    }
+}
+
+/* neutralize any older padding rules */
+main {
+    padding-top: 0 !important;
+}
+
+.catalog-page,
+.header-container {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* If you apply a class to the main-nav, you can match the variable height */
+.navbar.fs-mainnav {
+    min-height: var(--fs-mainnav-h);
+}
+
+/* =========================
+   RESPONSIVE: HEADER + LAYOUT fine-tuning
+   ========================= */
+
 /* Phones <576px */
 @media (max-width:575.98px) {
 
-    /* make header non-fixed so it doesn’t cover content */
     header.fixed-top,
     .fixed-top-desktop-only {
         position: static !important;
     }
 
-    main {
-        padding-top: 1.25rem;
-    }
-
-    /* compact header */
     #topnav .col-12 {
         padding-top: .25rem;
         padding-bottom: .25rem;
@@ -295,7 +373,6 @@ main {
         font-size: 1rem;
     }
 
-    /* compact header search */
     header form input[type="text"] {
         height: 2.25rem;
         font-size: .95rem;
@@ -306,7 +383,6 @@ main {
         padding: .25rem .5rem;
     }
 
-    /* section rhythm + image control */
     .section {
         margin: 1.25rem 0;
     }
@@ -336,11 +412,6 @@ main {
         font-size: 1.125rem;
     }
 
-    .section p {
-        font-size: .95rem;
-    }
-
-    /* CTA buttons full width */
     .btn.btn-lg {
         width: 100%;
     }
@@ -354,17 +425,13 @@ main {
         position: static !important;
     }
 
-    main {
-        padding-top: 1.75rem;
+    .navbar {
+        padding: .35rem 0;
     }
 
     .main-logo-link h2 {
         font-size: 1.35rem;
         margin: 0;
-    }
-
-    .navbar {
-        padding: .35rem 0;
     }
 
     .section {
@@ -393,10 +460,6 @@ main {
 
 /* Tablets 768–991px */
 @media (min-width:768px) and (max-width:991.98px) {
-    main {
-        padding-top: 4rem;
-    }
-
     .navbar {
         padding: .5rem 0;
     }
@@ -429,24 +492,8 @@ main {
     }
 }
 
-/* Desktop ≥992px */
+/* Desktop ≥992px (additional adjustments) */
 @media (min-width:992px) {
-    .fixed-top-desktop-only {
-        position: fixed;
-        top: 0;
-        right: 0;
-        left: 0;
-        z-index: 1030;
-    }
-
-    main {
-        padding-top: 8.25rem;
-    }
-
-    .header-container {
-        padding-top: 164px;
-    }
-
     .section .panel img {
         height: auto;
     }
@@ -471,20 +518,8 @@ main {
     }
 }
 
-
-
-/* Push product list below fixed header */
-.catalog-page {
-    margin-top: 2rem;
-}
-
-/* phones/tablets */
-
-
-
-@media (min-width: 1400px) {
-
-    /* big desktops */
+/* Product list spacing for very large screens */
+@media (min-width:1400px) {
     .catalog-page {
         margin-top: 4.5rem;
     }

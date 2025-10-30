@@ -13,7 +13,7 @@
   <div class="row">
     <!-- Form -->
     <div class="col-lg-8 mb-4">
-      <form method="post" class="bg-white border rounded p-3 p-md-4 shadow-sm">
+      <form method="post" class="bg-white border rounded p-3 p-md-4 shadow-sm pb-5 pb-md-0">
         {% csrf_token %}
         {% if form.non_field_errors %}
           <div class="alert alert-danger mb-3">{{ form.non_field_errors }}</div>
@@ -107,17 +107,30 @@
     <aside class="col-lg-4">
       <div class="bg-white border rounded p-3 p-md-4 shadow-sm">
         <h3 class="h6 text-uppercase text-muted mb-3">Order summary</h3>
-        <ul class="list-unstyled small mb-3">
-          {% for it in order.items.all %}
-            <li class="d-flex justify-content-between">
-              <span>
-                {% if it.product %}{{ it.product.name }}{% else %}#{{ it.product_id }}{% endif %}
-                <span class="text-muted">× {{ it.quantity }}</span>
-              </span>
-              <span>£{{ it.line_total|floatformat:2 }}</span>
-            </li>
-          {% endfor %}
-        </ul>
+
+        <div class="table-responsive">
+          <table class="table table-striped fs-compact mb-2">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th class="text-right" style="width:80px;">Qty</th>
+                <th class="text-right" style="width:120px;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for it in order.items.all %}
+                <tr>
+                  <td>
+                    {% if it.product %}{{ it.product.name }}{% else %}#{{ it.product_id }}{% endif %}
+                  </td>
+                  <td class="text-right">{{ it.quantity }}</td>
+                  <td class="text-right">£{{ it.line_total|floatformat:2 }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
         <hr class="my-2">
         <div class="d-flex justify-content-between font-weight-bold">
           <span>Total</span>

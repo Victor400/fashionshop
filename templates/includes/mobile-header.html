@@ -19,9 +19,7 @@
       </button>
       <div class="dropdown-menu dropdown-menu-right border-0" aria-labelledby="m-user">
         {% if request.user.is_authenticated %}
-          {% if request.user.is_staff %}
-            <a href="{% url 'catalog:product_create' %}" class="dropdown-item">Product Management</a>
-          {% endif %}
+          {% if request.user.is_staff %}<a href="{% url 'catalog:product_create' %}" class="dropdown-item">Product Management</a>{% endif %}
           <a href="#" class="dropdown-item">My Profile</a>
           <a href="{% url 'account_logout' %}" class="dropdown-item">Logout</a>
         {% else %}

@@ -1,7 +1,25 @@
 {# templates/includes/main-nav.html #}
-<ul class="nav flex-lg-row flex-column">
-  <li class="nav-item"><a class="nav-link px-0 px-lg-3" href="{% url 'catalog:product_list' %}?cat=menswear">Menswear</a></li>
-  <li class="nav-item"><a class="nav-link px-0 px-lg-3" href="{% url 'catalog:product_list' %}?cat=womenswear">Womenswear</a></li>
-  <li class="nav-item"><a class="nav-link px-0 px-lg-3" href="{% url 'catalog:product_list' %}?cat=shoes">Shoes</a></li>
-  <li class="nav-item"><a class="nav-link px-0 px-lg-3" href="{% url 'catalog:product_list' %}?cat=bags">Bags</a></li>
+<ul class="nav fs-mainnav justify-content-center">
+  <li class="nav-item">
+    <a class="nav-link px-3" href="{% url 'catalog:product_list' %}?cat=menswear">Menswear</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link px-3" href="{% url 'catalog:product_list' %}?cat=womenswear">Womenswear</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link px-3" href="{% url 'catalog:product_list' %}?cat=shoes">Shoes</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link px-3" href="{% url 'catalog:product_list' %}?cat=bags">Bags</a>
+  </li>
+
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle px-3" href="#" id="aboutMenu" data-toggle="dropdown"
+       aria-haspopup="true" aria-expanded="false">About</a>
+    <div class="dropdown-menu" aria-labelledby="aboutMenu">
+      <a class="dropdown-item" href="{% url 'home:our_story' %}">Our Story</a>
+      <a class="dropdown-item" href="{% url 'home:careers' %}">Careers</a>
+      <a class="dropdown-item" href="{% url 'home:modern_slavery' %}">Modern Slavery Statement</a>
+    </div>
+  </li>
 </ul>

@@ -5,16 +5,18 @@
 
 {% block content %}
 <div class="container mt-4 pt-2 mt-lg-5 pt-lg-4">
-  <h1 class="h4 mb-3">Order #{{ order.pk }}</h1>
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h4 mb-0">Order #{{ order.pk }}</h1>
+    <span class="badge badge-secondary text-uppercase">Status: {{ order.status }}</span>
+  </div>
 
-  <div class="mb-3 d-flex flex-wrap align-items-center w-100">
-    <span class="badge badge-secondary text-uppercase mr-2">Status: {{ order.status }}</span>
+  <div class="mb-3 small text-muted d-flex flex-wrap">
     {% if order.user %}
-      <span class="text-muted mr-2">Customer: {{ order.user }}</span>
+      <span class="mr-3">Customer: <strong class="text-dark">{{ order.user }}</strong></span>
     {% endif %}
-    <span class="text-muted mr-2">Placed: {{ order.created_at|date:"Y-m-d H:i" }}</span>
+    <span>Placed: {{ order.created_at|date:"Y-m-d H:i" }}</span>
 
-    <div class="ml-auto d-flex align-items-center">
+    <div class="ml-auto d-flex align-items-center mt-2 mt-md-0">
       {% if request.user.is_staff and order.status != 'delivered' and order.status != 'cancelled' %}
         <a href="{% url 'orders:order_status_update' order.pk %}" class="btn btn-outline-dark btn-sm mr-2">
           Change status
@@ -48,18 +50,18 @@
     <div class="row mb-3">
       <div class="col-md-6">
         <div class="border rounded p-3 bg-white h-100">
-          <h2 class="h6 mb-2">Buyer</h2>
-          <ul class="list-unstyled mb-0 small text-muted">
-            {% if order.buyer_name %}<li><strong class="text-dark">Name:</strong> {{ order.buyer_name }}</li>{% endif %}
-            {% if order.buyer_email %}<li><strong class="text-dark">Email:</strong> {{ order.buyer_email }}</li>{% endif %}
-            {% if order.buyer_phone %}<li><strong class="text-dark">Phone:</strong> {{ order.buyer_phone }}</li>{% endif %}
+          <h2 class="h6 text-uppercase text-muted mb-2">Buyer</h2>
+          <ul class="list-unstyled mb-0 small">
+            {% if order.buyer_name %}<li><strong>Name:</strong> {{ order.buyer_name }}</li>{% endif %}
+            {% if order.buyer_email %}<li><strong>Email:</strong> {{ order.buyer_email }}</li>{% endif %}
+            {% if order.buyer_phone %}<li><strong>Phone:</strong> {{ order.buyer_phone }}</li>{% endif %}
           </ul>
         </div>
       </div>
       <div class="col-md-6 mt-3 mt-md-0">
         <div class="border rounded p-3 bg-white h-100">
-          <h2 class="h6 mb-2">Shipping</h2>
-          <ul class="list-unstyled mb-0 small text-muted">
+          <h2 class="h6 text-uppercase text-muted mb-2">Shipping</h2>
+          <ul class="list-unstyled mb-0 small">
             {% if order.ship_address1 %}<li>{{ order.ship_address1 }}</li>{% endif %}
             {% if order.ship_address2 %}<li>{{ order.ship_address2 }}</li>{% endif %}
             {% if order.ship_city or order.ship_postcode %}
@@ -72,15 +74,16 @@
     </div>
   {% endif %}
 
+  {# Items #}
   {% if order.items.all %}
     <div class="table-responsive mb-3">
-      <table class="table">
+      <table class="table table-striped fs-compact">
         <thead>
           <tr>
             <th>Product</th>
-            <th class="text-right">Qty</th>
-            <th class="text-right">Unit</th>
-            <th class="text-right">Line total</th>
+            <th class="text-right" style="width:100px;">Qty</th>
+            <th class="text-right" style="width:140px;">Unit</th>
+            <th class="text-right" style="width:160px;">Line total</th>
           </tr>
         </thead>
         <tbody>
@@ -111,33 +114,63 @@
     <div class="alert alert-light border">No items on this order.</div>
   {% endif %}
 
+  {# Payments #}
   {% if order.payments.all %}
     <div class="mb-3">
-      <h2 class="h6">Payments</h2>
-      <ul class="list-unstyled small mb-0">
-        {% for pm in order.payments.all %}
-          <li>
-            <strong>{{ pm.provider }}/{{ pm.method }}</strong> — {{ pm.status }}
-            for £{{ pm.amount|floatformat:2 }}
-            <span class="text-muted">({{ pm.created_at|date:"Y-m-d H:i" }})</span>
-            {% if pm.provider_ref %}<span class="text-muted">ref: {{ pm.provider_ref }}</span>{% endif %}
-          </li>
-        {% endfor %}
-      </ul>
+      <h2 class="h6 text-uppercase text-muted mb-2">Payments</h2>
+      <div class="table-responsive">
+        <table class="table table-striped fs-compact mb-0">
+          <thead>
+            <tr>
+              <th>Provider / Method</th>
+              <th>Status</th>
+              <th class="text-right">Amount</th>
+              <th>Reference</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody class="small">
+            {% for pm in order.payments.all %}
+              <tr>
+                <td><strong>{{ pm.provider }}</strong> / {{ pm.method }}</td>
+                <td>{{ pm.status }}</td>
+                <td class="text-right">£{{ pm.amount|floatformat:2 }}</td>
+                <td class="text-monospace">{% if pm.provider_ref %}{{ pm.provider_ref }}{% else %}—{% endif %}</td>
+                <td>{{ pm.created_at|date:"Y-m-d H:i" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   {% endif %}
 
+  {# Status history #}
   {% if order.status_history.all %}
     <div class="mt-3">
-      <h2 class="h6">Status history</h2>
-      <ul class="small text-muted mb-0">
-        {% for h in order.status_history.all %}
-          <li>
-            {{ h.created_at|date:"Y-m-d H:i" }} — {{ h.from_status }} → <strong>{{ h.to_status }}</strong>
-            {% if h.changed_by %}by {{ h.changed_by }}{% endif %}
-          </li>
-        {% endfor %}
-      </ul>
+      <h2 class="h6 text-uppercase text-muted mb-2">Status history</h2>
+      <div class="table-responsive">
+        <table class="table table-striped fs-compact mb-0">
+          <thead>
+            <tr>
+              <th>When</th>
+              <th>From</th>
+              <th>To</th>
+              <th>Changed by</th>
+            </tr>
+          </thead>
+          <tbody class="small">
+            {% for h in order.status_history.all %}
+              <tr>
+                <td>{{ h.created_at|date:"Y-m-d H:i" }}</td>
+                <td>{{ h.from_status }}</td>
+                <td><strong>{{ h.to_status }}</strong></td>
+                <td>{% if h.changed_by %}{{ h.changed_by }}{% else %}—{% endif %}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   {% endif %}
 
