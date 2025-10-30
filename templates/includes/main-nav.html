@@ -1,67 +1,7 @@
-<div class="collapse navbar-collapse" id="main-nav">
-  <ul class="navbar-nav w-auto mx-auto">
-    <!-- All Products + Sort -->
-    <li class="nav-item dropdown">
-      <a class="logo-font font-weight-bold nav-link text-black mr-5 dropdown-toggle"
-         href="#"
-         id="all-products-link"
-         data-toggle="dropdown"
-         aria-haspopup="true"
-         aria-expanded="false"
-         role="button">
-        All Products
-      </a>
-      <div class="dropdown-menu border-0" aria-labelledby="all-products-link">
-        <a class="dropdown-item"
-           href="{% url 'catalog:product_list' %}?sort=price&direction=asc">
-          By Price (Low → High)
-        </a>
-        <a class="dropdown-item"
-           href="{% url 'catalog:product_list' %}?sort=price&direction=desc">
-          By Price (High → Low)
-        </a>
-        <div class="dropdown-divider"></div>
-        <a class="dropdown-item"
-           href="{% url 'catalog:product_list' %}">
-          All Products
-        </a>
-      </div>
-    </li>
-
-    <!-- Shop by Category -->
-    <li class="nav-item dropdown">
-      <a class="logo-font font-weight-bold nav-link text-black mr-5 dropdown-toggle"
-         href="#"
-         id="clothing-link"
-         data-toggle="dropdown"
-         aria-haspopup="true"
-         aria-expanded="false"
-         role="button">
-        Shop by Category
-      </a>
-      <div class="dropdown-menu border-0" aria-labelledby="clothing-link">
-        <a class="dropdown-item"
-           href="{% url 'catalog:product_list' %}?cat=menswear">
-          Menswear
-        </a>
-        <a class="dropdown-item"
-           href="{% url 'catalog:product_list' %}?cat=womenswear">
-          Womenswear
-        </a>
-        <a class="dropdown-item"
-           href="{% url 'catalog:product_list' %}?cat=shoes">
-          Shoes
-        </a>
-        <a class="dropdown-item"
-           href="{% url 'catalog:product_list' %}?cat=bags">
-          Bags
-        </a>
-        <div class="dropdown-divider"></div>
-        <a class="dropdown-item"
-           href="{% url 'catalog:product_list' %}">
-          All
-        </a>
-      </div>
-    </li>
-  </ul>
-</div>
+{# templates/includes/main-nav.html #}
+<ul class="nav flex-lg-row flex-column">
+  <li class="nav-item"><a class="nav-link px-0 px-lg-3" href="{% url 'catalog:product_list' %}?cat=menswear">Menswear</a></li>
+  <li class="nav-item"><a class="nav-link px-0 px-lg-3" href="{% url 'catalog:product_list' %}?cat=womenswear">Womenswear</a></li>
+  <li class="nav-item"><a class="nav-link px-0 px-lg-3" href="{% url 'catalog:product_list' %}?cat=shoes">Shoes</a></li>
+  <li class="nav-item"><a class="nav-link px-0 px-lg-3" href="{% url 'catalog:product_list' %}?cat=bags">Bags</a></li>
+</ul>

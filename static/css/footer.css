@@ -1,0 +1,72 @@
+/* ========= FashionShop Footer (dark, centered, 3 columns) ========= */
+
+.fs-footer{
+  background:#0f1115;            /* deep slate */
+  color:#cbd5e1;                  /* slate-200 */
+  border-top:1px solid #191c22;
+  margin-top:56px;
+  font-size:16px;
+}
+.fs-footer a{ color:#d7e0ee; text-decoration:none; }
+.fs-footer a:hover{ color:#ffffff; text-decoration:underline; }
+
+/* brand block */
+.fs-brand{ padding:36px 0 8px; }
+.fs-logo{
+  display:inline-block;
+  font-weight:900;
+  font-size:28px;
+  letter-spacing:.3px;
+  color:#fff;
+}
+.fs-logo span{ font-weight:700; }
+.fs-tag{
+  margin:8px 0 14px;
+  color:#93a0b3;                 /* muted */
+  font-size:15px;
+}
+.fs-socials{
+  display:flex; justify-content:center; gap:12px;
+  margin-bottom:10px;
+}
+.fs-socials a{
+  width:40px; height:40px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border:1px solid #232834;
+  border-radius:999px;
+  background:#141821;
+}
+.fs-socials a:hover{ background:#1b2130; }
+
+/* columns area (uses Bootstrap grid but we style the innards) */
+.fs-columns{
+  padding:14px 0 22px;
+  max-width:1000px;              /* keeps the 3-col block narrow and centered */
+  margin:0 auto;                 /* center the row itself */
+}
+.fs-title{
+  color:#ffffff;
+  font-weight:800;
+  font-size:17px;
+  letter-spacing:.2px;
+  margin:0 0 12px;
+}
+.fs-list{ list-style:none; padding:0; margin:0; }
+.fs-list li{ margin:10px 0; }
+
+/* bottom bar */
+.fs-bottom{
+  border-top:1px solid #1a2030;
+  padding:14px 0 24px;
+  color:#8b98ac;
+  gap:10px;
+}
+.fs-legal a{ color:#aab6ca; }
+.fs-legal a:hover{ color:#fff; }
+
+/* responsive niceties */
+@media (max-width: 767.98px){
+  .fs-brand{ padding-top:28px; }
+  .fs-columns{ max-width:620px; }
+  .fs-bottom{ text-align:center; }
+}
