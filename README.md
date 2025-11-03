@@ -3,6 +3,8 @@
 A modern Django e-commerce project featuring a product catalogue, cart, orders, a two-step checkout (details → pay), and Stripe payments (with an optional webhook flow). Built against a PostgreSQL schema (fashionshop), using unmanaged Django models that map directly to your existing database tables.
 
 This README explains the project’s goals, features, data model, setup, and how to run it locally.
+### Project Link
+You can view the live project here: [Fashion Shop Ecommerce](https://fashionshop-app-73553765d37a.herokuapp.com/)
 
 
 Table of Contents
